@@ -9,6 +9,10 @@
 <meta property="og:description" content="Free STEP, STL and PCB files for a sub-$1,000 tiltrotor built for first responders.">
 <meta property="og:image" content="assets/img/aircraft-final.png">
 <meta name="color-scheme" content="light">
+<!-- GoatCounter analytics (no cookies). Dashboard: https://ad314159.goatcounter.com -->
+<script id="gc" data-goatcounter="https://ad314159.goatcounter.com/count"
+        data-goatcounter-settings='{"no_onload": true}'
+        async src="https://gc.zgo.at/count.js"></script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230F2340'/%3E%3Cpath d='M8 36h48' stroke='%239DC3E6' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M16 36V20M48 36V20M10 20h12M42 20h12' stroke='%23FFA826' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1098,7 +1102,7 @@ const PARTS = [{"g":"wing","n":"aileron-L1","d":"Left control surface, inboard",
     });
     document.title=(id==='overview'?'R.A.M.P.A.T. | Open-source 3D-printed tiltrotor VTOL':tabs[ids.indexOf(id)].textContent+' | R.A.M.P.A.T.');
   }
-  function route(){ show(location.hash.slice(1)); window.scrollTo(0,0); }
+  function route(){ show(location.hash.slice(1)); window.scrollTo(0,0); trackView(); }
   tabs.forEach((t,i)=>{
     t.addEventListener('click',()=>{ location.hash=t.getAttribute('aria-controls'); });
     t.addEventListener('keydown',e=>{
@@ -1111,6 +1115,33 @@ const PARTS = [{"g":"wing","n":"aileron-L1","d":"Left control surface, inboard",
   });
   window.addEventListener('hashchange',route);
   show(location.hash.slice(1));
+
+  /* ---------- analytics (GoatCounter) ---------- */
+  // Each tab is counted as its own page (/cad, /pcb ...), and every download
+  // and email click is counted as an event, so the dashboard shows what people use.
+  const gcQueue=[];
+  function gc(opts){
+    if(window.goatcounter&&window.goatcounter.count){ try{ window.goatcounter.count(opts); }catch(e){} }
+    else gcQueue.push(opts);
+  }
+  document.getElementById('gc').addEventListener('load',()=>{ while(gcQueue.length) gc(gcQueue.shift()); });
+  let lastView='';
+  function trackView(){
+    const id=ids.includes(location.hash.slice(1))?location.hash.slice(1):'overview';
+    if(id===lastView) return; lastView=id;
+    gc({path:id==='overview'?'/':'/'+id, title:document.title});
+  }
+  trackView();
+  document.addEventListener('click',e=>{
+    const a=e.target.closest('a'); if(!a) return;
+    const href=a.getAttribute('href')||'';
+    if(a.hasAttribute('download')){
+      const file=href.split('/').pop();
+      gc({path:'download-'+file, title:'Download: '+file, event:true});
+    }else if(href.startsWith('mailto:')){
+      gc({path:'email-click', title:'Email link clicked', event:true});
+    }
+  });
 
   /* ---------- parts gallery ---------- */
   const grid=document.getElementById('parts'), q=document.getElementById('partSearch'),
