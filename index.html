@@ -261,6 +261,26 @@ td.num{font-family:var(--mono);font-size:.92rem;white-space:nowrap}
 .compare .vs span{display:block;color:var(--muted);font-size:.95rem}
 .compare figure img{aspect-ratio:1.62/1;object-fit:contain;width:100%;background:#F4F4F4}
 
+
+/* ---------- 3D viewer ---------- */
+.v3d{position:relative;aspect-ratio:16/10;margin-right:-4%;min-width:0}
+@media (max-width:999px){.v3d{margin:0;aspect-ratio:4/3}}
+.v3d-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transition:opacity .5s;filter:drop-shadow(0 30px 40px rgba(0,0,0,.35))}
+.v3d.ready .v3d-poster{opacity:0;pointer-events:none}
+.v3d-stage{position:absolute;inset:0;cursor:grab;touch-action:pan-y}
+.v3d-stage:active{cursor:grabbing}
+.v3d-stage canvas{display:block;width:100%!important;height:100%!important;outline:none}
+.v3d-bar{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;pointer-events:none}
+.v3d-bar > *{pointer-events:auto}
+.v3d-views{display:inline-flex;background:rgba(15,35,64,.72);backdrop-filter:blur(6px);border:1px solid var(--navy-line);border-radius:999px;padding:3px}
+.v3d-views button,.v3d-spin{appearance:none;border:0;background:transparent;color:#C9D6E8;font:600 .88rem var(--body);padding:.4rem .8rem;border-radius:999px;cursor:pointer}
+.v3d-views button[aria-pressed="true"]{background:#fff;color:var(--navy)}
+.v3d-views button:hover:not([aria-pressed="true"]),.v3d-spin:hover{color:#fff}
+.v3d-spin{background:rgba(15,35,64,.72);border:1px solid var(--navy-line)}
+.v3d-spin[aria-pressed="true"]{color:var(--amber)}
+.v3d-hint{position:absolute;top:0;right:0;margin:0;font-size:.82rem;color:#A9BCD6;transition:opacity .4s}
+.v3d.touched .v3d-hint{opacity:0}
+
 /* ---------- footer ---------- */
 footer{background:var(--navy);color:#C9D6E8;padding-block:2.5rem 3rem;font-size:.95rem}
 footer .wrap{display:grid;gap:1.5rem}
@@ -314,9 +334,20 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
           <a class="btn ghost" href="#cad">Browse the CAD</a>
         </div>
       </div>
-      <figure>
-        <img src="assets/img/aircraft-final.png" width="1163" height="693" alt="Render of R.A.M.P.A.T. with its light blue printed wing, white fuselage, V-tail and three orange tilting motor nacelles.">
-      </figure>
+      <div class="v3d" id="v3d">
+        <img class="v3d-poster" src="assets/img/aircraft-final.png" width="1163" height="693" alt="Render of R.A.M.P.A.T. with its blue printed wing, grey fuselage, V-tail and three tilting motor nacelles.">
+        <div class="v3d-stage" id="v3dStage" role="img" aria-label="Interactive 3D model of R.A.M.P.A.T. Drag to rotate."></div>
+        <div class="v3d-bar" hidden id="v3dBar">
+          <div class="v3d-views" role="group" aria-label="Camera view">
+            <button type="button" data-view="iso" aria-pressed="true">Iso</button>
+            <button type="button" data-view="front" aria-pressed="false">Front</button>
+            <button type="button" data-view="side" aria-pressed="false">Side</button>
+            <button type="button" data-view="top" aria-pressed="false">Top</button>
+          </div>
+          <button type="button" class="v3d-spin" id="v3dSpin" aria-pressed="true">Auto-rotate</button>
+        </div>
+        <p class="v3d-hint" hidden id="v3dHint">Drag to rotate · right-drag to pan · click, then scroll to zoom</p>
+      </div>
     </div>
     <div class="specs">
       <div class="wrap">
@@ -998,6 +1029,107 @@ const PARTS = [{"g":"wing","n":"aileron-L1","d":"Left control surface, inboard",
   sp.addEventListener('input',draw);
   fbtn.forEach(b=>b.addEventListener('click',()=>{ field=b.dataset.field; fbtn.forEach(x=>x.setAttribute('aria-pressed',x===b)); draw(); }));
 })();
+</script>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const box = document.getElementById('v3d'), stage = document.getElementById('v3dStage');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); }
+catch (e) { throw new Error('WebGL unavailable; keeping the static render'); }
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.95;
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+const sun = new THREE.DirectionalLight(0xffffff, 1.4); sun.position.set(-1, 2, 1.5); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xcfe0f5, 0.7); fill.position.set(1, -1.2, -0.8); scene.add(fill);
+scene.add(new THREE.HemisphereLight(0xdbe8f7, 0x50627c, 0.9));
+
+const camera = new THREE.PerspectiveCamera(30, 1, 10, 50000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.enableZoom = false;              // turned on only after the user clicks the model
+controls.autoRotate = !reduce; controls.autoRotateSpeed = 0.9;
+controls.screenSpacePanning = true;
+// on phones, vertical swipes keep scrolling the page; horizontal swipes rotate
+renderer.domElement.style.touchAction = 'pan-y';
+
+let radius = 1000;
+const VIEWS = { iso: [-0.9, 0.62, 1.0], front: [-1, 0.05, 0], side: [0, 0.05, 1], top: [-0.001, 1, 0.0001] };
+function setView(name, instant) {
+  const d = new THREE.Vector3(...VIEWS[name]).normalize().multiplyScalar(radius * 2.15);
+  const from = camera.position.clone(), fromT = controls.target.clone(), t0 = performance.now();
+  const dur = instant || reduce ? 0 : 650;
+  function step(now) {
+    const k = dur ? Math.min(1, (now - t0) / dur) : 1, e = 1 - Math.pow(1 - k, 3);
+    camera.position.lerpVectors(from, d, e); controls.target.lerpVectors(fromT, new THREE.Vector3(), e);
+    if (k < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === name));
+}
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage); resize();
+
+const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+loader.load('assets/rampat.glb', gltf => {
+  const model = gltf.scene;
+  const sphere = new THREE.Box3().setFromObject(model).getBoundingSphere(new THREE.Sphere());
+  model.position.sub(sphere.center); radius = sphere.radius;
+  model.traverse(o => {
+    if (!o.isMesh) return;
+    o.material.side = THREE.DoubleSide;
+    // dark feature edges, like a CAD part studio
+    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(o.geometry, 32),
+      new THREE.LineBasicMaterial({ color: 0x0b1626, transparent: true, opacity: 0.35 }));
+    o.add(edges);
+  });
+  scene.add(model);
+  controls.minDistance = radius * 0.6; controls.maxDistance = radius * 6;
+  setView('iso', true);
+  box.classList.add('ready');
+  document.getElementById('v3dBar').hidden = false;
+  document.getElementById('v3dHint').hidden = false;
+}, undefined, err => console.warn('3D model failed to load; showing the static render', err));
+
+// interaction details
+const spin = document.getElementById('v3dSpin');
+function setSpin(on) { controls.autoRotate = on; spin.setAttribute('aria-pressed', on); }
+if (reduce) setSpin(false);
+spin.addEventListener('click', () => setSpin(!controls.autoRotate));
+document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => { setSpin(false); setView(b.dataset.view); }));
+renderer.domElement.addEventListener('pointerdown', () => { controls.enableZoom = true; box.classList.add('touched'); setSpin(false); });
+renderer.domElement.addEventListener('pointerleave', () => { controls.enableZoom = false; });
+renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
+
+// render only while the hero is on screen and the Overview tab is open
+let visible = true;
+new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(stage);
+renderer.setAnimationLoop(() => {
+  if (!visible || stage.offsetParent === null) return;
+  controls.update(); renderer.render(scene, camera);
+});
 </script>
 </body>
 </html>
