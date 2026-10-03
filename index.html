@@ -251,13 +251,18 @@ td.num{font-family:var(--mono);font-size:.92rem;white-space:nowrap}
 .seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
 .seg button:hover:not([aria-pressed="true"]){background:#DCE4ED}
 .v-label{font:500 .95rem var(--mono);color:var(--muted)}
-.v-stage{aspect-ratio:2.25/1;background:#F7F9FB;display:grid;place-items:center;padding:1rem}
-.v-stage img{max-height:100%;width:auto;object-fit:contain;transition:opacity .25s}
+.v-stage{background:#F7F9FB}
+.v-stage canvas{display:block;width:100%;height:auto;aspect-ratio:1200/540}
 .v-foot{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;padding:1rem 1.3rem;border-top:1px solid var(--line)}
 .scale{display:flex;align-items:center;gap:.6rem;font-size:.9rem;color:var(--muted)}
-.scale img{width:200px;height:12px;border-radius:2px}
+.scale{flex:1 1 320px;max-width:520px}
+.scale img{flex:1;min-width:0;width:100%;height:12px;border-radius:2px}
 .speed-range{display:flex;align-items:center;gap:.8rem;flex:1;min-width:240px}
-.speed-range input{flex:1;accent-color:var(--navy)}
+.speed-track{flex:1;position:relative;padding-bottom:1.3rem}
+.speed-track input{width:100%;margin:0;accent-color:var(--navy);cursor:pointer}
+.ticks{position:absolute;left:8px;right:8px;bottom:0;height:1.1rem}
+.ticks button{position:absolute;transform:translateX(-50%);background:none;border:0;padding:0;font:500 .78rem var(--mono);color:var(--muted);cursor:pointer}
+.ticks button:hover,.ticks button.on{color:var(--ink)}
 
 .compare{display:grid;gap:1.25rem;align-items:stretch}
 @media (min-width:900px){.compare{grid-template-columns:1fr auto 1fr}}
@@ -863,16 +868,23 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem;align-conte
           </div>
           <div class="speed-range">
             <label for="speed" style="font-weight:600">Airspeed</label>
-            <input id="speed" type="range" min="0" max="3" step="1" value="0" list="speedTicks">
-            <datalist id="speedTicks"><option value="0"></option><option value="1"></option><option value="2"></option><option value="3"></option></datalist>
+            <div class="speed-track">
+              <input id="speed" type="range" min="0" max="3" step="0.01" value="0" aria-valuetext="15 metres per second">
+              <div class="ticks" aria-hidden="true">
+                <button type="button" tabindex="-1" data-stop="0" style="left:0%">15</button>
+                <button type="button" tabindex="-1" data-stop="1" style="left:33.333%">17.5</button>
+                <button type="button" tabindex="-1" data-stop="2" style="left:66.667%">20</button>
+                <button type="button" tabindex="-1" data-stop="3" style="left:100%">22.5</button>
+              </div>
+            </div>
             <output id="speedOut" class="v-label" for="speed">15 m/s</output>
           </div>
         </div>
         <div class="v-stage">
-          <img id="field" src="assets/img/cfd-v-15.jpg" alt="Velocity field around the aircraft at 15 metres per second.">
+          <canvas id="fieldCanvas" width="1200" height="540" role="img" aria-label="Velocity field around the aircraft at 15 metres per second."></canvas>
         </div>
         <div class="v-foot">
-          <div class="scale"><span>Low</span><img src="assets/img/cfd-colorbar.png" width="374" height="17" alt=""><span>High</span></div>
+          <div class="scale"><span>Low</span><img src="assets/img/cfd-colorbar.png" width="600" height="16" alt=""><span>High</span></div>
           <p class="fine" id="fieldNote">Side view. Blue areas are slower air; red areas are faster.</p>
         </div>
       </div>
@@ -1174,22 +1186,69 @@ const PARTS = [{"g":"wing","n":"aileron-L1","d":"Left control surface, inboard",
   }));
   q.addEventListener('input',filter);
 
-  /* ---------- CFD field viewer ---------- */
-  const SPEEDS=[['15','15'],['17_5','17.5'],['20','20'],['22_5','22.5']];
-  const img=document.getElementById('field'), sp=document.getElementById('speed'), out=document.getElementById('speedOut'),
-        note=document.getElementById('fieldNote'), fbtn=[...document.querySelectorAll('[data-field]')];
-  let field='v';
-  // preload
-  SPEEDS.forEach(([k])=>['v','p'].forEach(f=>{ const i=new Image(); i.src=`assets/img/cfd-${f}-${k}.jpg`; }));
-  function draw(){
-    const [k,label]=SPEEDS[+sp.value];
-    img.src=`assets/img/cfd-${field}-${k}.jpg`;
-    img.alt=`${field==='v'?'Velocity':'Pressure'} field around the aircraft at ${label} metres per second.`;
-    out.textContent=`${label} m/s`;
-    note.textContent= field==='v' ? 'Side view. Blue areas are slower air; red areas are faster.' : 'Side view. Red areas are high pressure, which adds drag; blue areas are low pressure.';
+  /* ---------- CFD field viewer ----------
+     All eight renders are pre-aligned so the aircraft sits in exactly the same
+     place. Dragging the slider cross-fades between neighbouring airspeeds, and
+     switching Velocity/Pressure cross-fades between the two fields. */
+  const KEYS=['15','17_5','20','22_5'], LABELS=[15,17.5,20,22.5];
+  const cv=document.getElementById('fieldCanvas'), cx=cv.getContext('2d');
+  const sp=document.getElementById('speed'), out=document.getElementById('speedOut'),
+        note=document.getElementById('fieldNote'), fbtn=[...document.querySelectorAll('[data-field]')],
+        ticks=[...document.querySelectorAll('.ticks button')];
+  const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const IMG={v:[],p:[]};
+  let pos=0, mix=0, mixTarget=0, anim=null;          // mix: 0 = velocity, 1 = pressure
+  ['v','p'].forEach(f=>KEYS.forEach((k,i)=>{ const im=new Image(); im.onload=paint; im.src=`assets/img/cfd-${f}-${k}.jpg`; IMG[f][i]=im; }));
+  function layer(f,alpha){
+    const i=Math.min(2,Math.floor(pos)), t=pos-i;
+    const a=IMG[f][i], b=IMG[f][i+1];
+    if(a.complete&&a.naturalWidth){ cx.globalAlpha=alpha; cx.drawImage(a,0,0,cv.width,cv.height); }
+    if(t>0.001&&b.complete&&b.naturalWidth){ cx.globalAlpha=alpha*t; cx.drawImage(b,0,0,cv.width,cv.height); }
   }
-  sp.addEventListener('input',draw);
-  fbtn.forEach(b=>b.addEventListener('click',()=>{ field=b.dataset.field; fbtn.forEach(x=>x.setAttribute('aria-pressed',x===b)); draw(); }));
+  function paint(){
+    cx.globalAlpha=1;
+    layer('v',1);
+    if(mix>0.001) layer('p',mix);
+    cx.globalAlpha=1;
+  }
+  function speedAt(p){ const i=Math.min(2,Math.floor(p)), t=p-i; return LABELS[i]+(LABELS[i+1]-LABELS[i])*t; }
+  function label(){
+    const v=speedAt(pos), onStop=Math.abs(pos-Math.round(pos))<0.02;
+    const txt=onStop?`${LABELS[Math.round(pos)]} m/s`:`${v.toFixed(1)} m/s`;
+    out.textContent=txt;
+    const field=mixTarget?'Pressure':'Velocity';
+    cv.setAttribute('aria-label',`${field} field around the aircraft at ${txt.replace(' m/s',' metres per second')}.`);
+    sp.setAttribute('aria-valuetext',txt.replace(' m/s',' metres per second'));
+    ticks.forEach((t,i)=>t.classList.toggle('on',onStop&&Math.round(pos)===i));
+  }
+  // animate pos and mix toward their targets
+  let posTarget=0;
+  function tick(){
+    const k=reduceMotion?1:0.16;
+    pos+=(posTarget-pos)*k; mix+=(mixTarget-mix)*(reduceMotion?1:0.14);
+    if(Math.abs(posTarget-pos)<0.002) pos=posTarget;
+    if(Math.abs(mixTarget-mix)<0.002) mix=mixTarget;
+    paint(); label();
+    anim=(pos!==posTarget||mix!==mixTarget)?requestAnimationFrame(tick):null;
+  }
+  function go(){ if(!anim) anim=requestAnimationFrame(tick); }
+  let dragging=false;
+  sp.addEventListener('pointerdown',()=>dragging=true);
+  sp.addEventListener('input',()=>{ posTarget=+sp.value; if(dragging){ pos=posTarget; paint(); label(); } else go(); });
+  function snap(){ dragging=false; posTarget=Math.round(+sp.value); sp.value=posTarget; go(); }
+  sp.addEventListener('pointerup',snap); sp.addEventListener('change',snap);
+  sp.addEventListener('keydown',e=>{            // arrow keys jump between the four airspeeds
+    const d={ArrowRight:1,ArrowUp:1,ArrowLeft:-1,ArrowDown:-1}[e.key];
+    if(d){ e.preventDefault(); posTarget=Math.max(0,Math.min(3,Math.round(posTarget)+d)); sp.value=posTarget; go(); }
+  });
+  ticks.forEach(t=>t.addEventListener('click',()=>{ posTarget=+t.dataset.stop; sp.value=posTarget; go(); }));
+  fbtn.forEach(b=>b.addEventListener('click',()=>{
+    mixTarget=b.dataset.field==='p'?1:0;
+    fbtn.forEach(x=>x.setAttribute('aria-pressed',x===b));
+    note.textContent= mixTarget ? 'Side view. Red areas are high pressure, which adds drag; blue areas are low pressure.' : 'Side view. Blue areas are slower air; red areas are faster.';
+    go();
+  }));
+  label();
 })();
 </script>
 
