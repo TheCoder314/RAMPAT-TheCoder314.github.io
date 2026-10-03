@@ -208,9 +208,16 @@ figcaption{font-size:.88rem;color:var(--muted);margin-top:.7rem}
 .parts{display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
 @media (max-width:560px){.parts{grid-template-columns:1fr 1fr;gap:.6rem}.part .row{flex-wrap:wrap}.part .fn{font-size:.8rem}}
 .part{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;display:flex;flex-direction:column}
-.part .thumb{background:linear-gradient(#F7F9FB,#EBEFF4);aspect-ratio:4/3}
+.part-open{all:unset;display:flex;flex-direction:column;cursor:pointer;flex:1}
+.part-open:focus-visible{outline:3px solid var(--amber);outline-offset:-3px}
+.part .thumb{display:block;position:relative;background:linear-gradient(#F7F9FB,#EBEFF4);aspect-ratio:4/3}
+.view3d{position:absolute;right:.5rem;bottom:.5rem;font:600 .78rem var(--body);background:var(--navy);color:#fff;padding:.25rem .55rem;border-radius:999px;opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s}
+.part:hover .view3d,.part-open:focus-visible .view3d{opacity:1;transform:none}
+.part:hover{border-color:#AFC0D2}
+.part .meta-foot{flex:0;padding-top:0}
 .part .thumb img{width:100%;height:100%;object-fit:contain}
 .part .meta{padding:.8rem .9rem .9rem;display:flex;flex-direction:column;gap:.15rem;flex:1}
+.part-open .meta{padding-bottom:0}
 .part .fn{font:500 .9rem var(--mono);word-break:break-all}
 .part .ds{font-size:.92rem;color:var(--muted)}
 .part .row{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:.6rem;gap:.5rem}
@@ -332,6 +339,44 @@ td.num{font-family:var(--mono);font-size:.92rem;white-space:nowrap}
 .contact p{color:#C9D6E8}
 .contact .btn{margin-top:.4rem}
 .contact-addr{font:500 .95rem var(--mono);margin:.9rem 0 0;word-break:break-all}
+
+
+/* ---------- part detail dialog ---------- */
+.pd{border:0;padding:0;background:transparent;max-width:min(860px,100vw - 2rem);width:100%;max-height:calc(100vh - 2rem);margin:auto;color:var(--ink)}
+.pd::backdrop{background:rgba(9,20,38,.62);backdrop-filter:blur(3px)}
+.pd[open]{animation:pdIn .18s ease-out}
+@keyframes pdIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+.pd-box{background:var(--card);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 2rem);overflow-y:auto}
+.pd-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;padding:1.2rem 1.4rem .9rem}
+.pd-head h2{font:700 1.7rem/1.05 var(--mono);letter-spacing:-.01em;margin:.35rem 0 .2rem;word-break:break-all}
+.pd-head p{margin:0;color:var(--muted)}
+.pd-group{font:600 .8rem var(--body);background:var(--sky-tint);color:#1B4F86;padding:.2rem .55rem;border-radius:999px}
+.pd-x{flex:none;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);display:grid;place-items:center;cursor:pointer;color:var(--ink)}
+.pd-x:hover{border-color:var(--ink)}
+.pd-x svg{width:18px;height:18px;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;fill:none}
+.pd-view{position:relative;aspect-ratio:16/9;max-height:50vh;width:100%;background:radial-gradient(ellipse at 50% 42%,#FFFFFF 0%,#E7EDF3 75%);border-block:1px solid var(--line);flex:none;cursor:grab;touch-action:none}
+.pd-view:active{cursor:grabbing}
+.pd-view canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+.pd-view > img{position:absolute;inset:8%;width:84%;height:84%;object-fit:contain;transition:opacity .3s}
+.pd-view.ready > img{opacity:0}
+.pd-loading{position:absolute;left:1rem;top:1rem;font:500 .85rem var(--mono);color:var(--muted)}
+.pd-view.ready .pd-loading{display:none}
+.pd-tools{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.6rem .9rem;font-size:.82rem;color:var(--muted);pointer-events:none}
+.pd-tools button{pointer-events:auto;font:600 .85rem var(--body);background:var(--card);border:1.5px solid var(--line);color:var(--ink);padding:.35rem .75rem;border-radius:999px;cursor:pointer}
+.pd-tools button:hover{border-color:var(--ink)}
+@media (max-width:560px){.pd-tools span{display:none}}
+.pd-body{display:grid;gap:1rem;padding:1.2rem 1.4rem}
+@media (min-width:700px){.pd-body{grid-template-columns:1fr 1fr}}
+.pd-card{border:1px solid var(--line);border-radius:var(--r-md);padding:1rem 1.1rem}
+.pd-card h3{font-size:1.25rem;margin-bottom:.8rem}
+.pd-select{display:flex;align-items:center;gap:.7rem;font-weight:600;font-size:.95rem}
+.pd-select select{flex:1;font:600 1rem var(--body);color:var(--ink);padding:.55rem .7rem;border:1.5px solid var(--line);border-radius:var(--r-sm);background:#fff;cursor:pointer}
+.pd-select select:focus-visible{border-color:var(--ink)}
+.pd-weight{margin:1rem 0 .3rem;display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap}
+.pd-weight b{font:800 2.6rem/1 var(--display)}
+.pd-weight span{font:500 .88rem var(--mono);color:var(--muted)}
+.pd-note{font-size:.88rem;color:var(--muted);margin:.5rem 0 0}
+.pd-dl{margin:0 1.4rem 1.4rem;justify-content:center;font-size:1.05rem;padding:1rem}
 
 /* ---------- footer ---------- */
 footer{background:var(--navy);color:#C9D6E8;padding-block:2.5rem 3rem;font-size:.95rem}
@@ -1074,6 +1119,62 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem;align-conte
 </section>
 
 </main>
+<dialog class="pd" id="partDlg" aria-labelledby="pdTitle">
+  <div class="pd-box">
+    <header class="pd-head">
+      <div>
+        <span class="pd-group" id="pdGroup">Wing</span>
+        <h2 id="pdTitle">wing-panel-L1</h2>
+        <p id="pdDesc">Left wing panel, root</p>
+      </div>
+      <button type="button" class="pd-x" id="pdClose" aria-label="Close and return to the parts list"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </header>
+    <div class="pd-view" id="pdView">
+      <img id="pdThumb" src="" alt="" width="480" height="360">
+      <div class="pd-loading" id="pdLoading">Loading 3D model…</div>
+      <div class="pd-tools">
+        <span>Drag to rotate · right-drag to pan · scroll to zoom</span>
+        <button type="button" id="pdReset">Reset view</button>
+      </div>
+    </div>
+    <div class="pd-body">
+      <section class="pd-card">
+        <h3>Print settings</h3>
+        <dl class="kv">
+          <dt>Profile</dt><dd id="pdProfile">Wing</dd>
+          <dt>Wall loops</dt><dd id="pdWalls">1</dd>
+          <dt>Infill</dt><dd id="pdInfill">5% gyroid</dd>
+          <dt>Layer height</dt><dd>0.2 mm</dd>
+          <dt>Top / bottom</dt><dd>4 / 3 layers</dd>
+          <dt>Supports</dt><dd>None</dd>
+          <dt>Size</dt><dd id="pdSize">—</dd>
+        </dl>
+      </section>
+      <section class="pd-card">
+        <h3>Estimated weight</h3>
+        <label class="pd-select"><span>Filament</span>
+          <select id="pdFil">
+            <option value="LW-PETG" selected>LW-PETG</option>
+            <option value="LW-PLA">LW-PLA</option>
+            <option value="PETG">PETG</option>
+            <option value="PLA">PLA</option>
+            <option value="ASA">ASA</option>
+            <option value="PETG-CF">PETG-CF</option>
+            <option value="ASA-CF">ASA-CF</option>
+          </select>
+        </label>
+        <p class="pd-weight"><b id="pdGrams">—</b><span id="pdRange"></span></p>
+        <p class="pd-note" id="pdNote"></p>
+        <p class="pd-note" id="pdTotal"></p>
+      </section>
+    </div>
+    <a class="btn pd-dl" id="pdDl" href="#" download>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></svg>
+      <span id="pdDlText">Download STL</span>
+    </a>
+  </div>
+</dialog>
+
 
 <footer>
   <div class="wrap">
@@ -1099,7 +1200,7 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem;align-conte
 </footer>
 
 <script>
-const PARTS = [{"g":"wing","n":"aileron-L1","d":"Left control surface, inboard","s":[200,50,20],"kb":106,"p":"wing"},{"g":"wing","n":"aileron-L2","d":"Left control surface, middle","s":[210,50,20],"kb":344,"p":"wing"},{"g":"wing","n":"aileron-L3","d":"Left control surface, outboard","s":[236,50,20],"kb":249,"p":"wing"},{"g":"wing","n":"aileron-R1","d":"Right control surface, inboard","s":[200,50,20],"kb":106,"p":"wing"},{"g":"wing","n":"aileron-R2","d":"Right control surface, middle","s":[210,50,20],"kb":344,"p":"wing"},{"g":"wing","n":"aileron-R3","d":"Right control surface, outboard","s":[236,50,20],"kb":249,"p":"wing"},{"g":"wing","n":"boom-mount-L","d":"Left boom mount, under wing","s":[42,34,16],"kb":96,"p":"con"},{"g":"wing","n":"boom-mount-R","d":"Right boom mount, under wing","s":[42,34,16],"kb":96,"p":"con"},{"g":"wing","n":"wing-panel-L1","d":"Left wing panel, root","s":[252,151,31],"kb":854,"p":"wing"},{"g":"wing","n":"wing-panel-L2","d":"Left wing panel","s":[155,114,23],"kb":403,"p":"wing"},{"g":"wing","n":"wing-panel-L3","d":"Left wing panel","s":[250,114,23],"kb":683,"p":"wing"},{"g":"wing","n":"wing-panel-L4","d":"Left wing panel, tip","s":[259,170,61],"kb":2727,"p":"wing"},{"g":"wing","n":"wing-panel-R1","d":"Right wing panel, root","s":[252,151,31],"kb":854,"p":"wing"},{"g":"wing","n":"wing-panel-R2","d":"Right wing panel","s":[155,114,23],"kb":403,"p":"wing"},{"g":"wing","n":"wing-panel-R3","d":"Right wing panel","s":[250,114,23],"kb":683,"p":"wing"},{"g":"wing","n":"wing-panel-R4","d":"Right wing panel, tip","s":[259,170,61],"kb":2742,"p":"wing"},{"g":"wing","n":"wing-root-plate-L","d":"Left wing root plate","s":[152,45,5],"kb":57,"p":"con"},{"g":"wing","n":"wing-root-plate-R","d":"Right wing root plate","s":[152,45,5],"kb":54,"p":"con"},{"g":"fuselage","n":"avionics-tray","d":"Floor plate for PCB and battery","s":[177,139,3],"kb":6,"p":"std"},{"g":"fuselage","n":"fuselage-center","d":"Center section, wing joint","s":[250,150,94],"kb":1566,"p":"fus"},{"g":"fuselage","n":"fuselage-front","d":"Front fuselage section","s":[250,150,69],"kb":12608,"p":"fus"},{"g":"fuselage","n":"fuselage-insert","d":"Internal fuselage insert","s":[134,44,29],"kb":1,"p":"std"},{"g":"fuselage","n":"nose-cone","d":"Streamlined nose cone","s":[178,75,69],"kb":362,"p":"fus"},{"g":"fuselage","n":"tail-boom-joiner","d":"Joins tail boom to center section","s":[65,27,27],"kb":11,"p":"con"},{"g":"nacelles","n":"boom-fairing-L","d":"Left boom fairing","s":[157,56,37],"kb":538,"p":"std"},{"g":"nacelles","n":"boom-fairing-R","d":"Right boom fairing","s":[157,56,37],"kb":543,"p":"std"},{"g":"nacelles","n":"front-boom-L","d":"Left motor boom with landing leg","s":[235,207,35],"kb":177,"p":"std"},{"g":"nacelles","n":"front-boom-R","d":"Right motor boom with landing leg","s":[235,235,44],"kb":205,"p":"std"},{"g":"nacelles","n":"servo-frame-L","d":"Left tilt-servo frame","s":[56,29,4],"kb":43,"p":"std"},{"g":"nacelles","n":"servo-frame-R","d":"Right tilt-servo frame","s":[56,29,4],"kb":43,"p":"std"},{"g":"nacelles","n":"servo-housing-L","d":"Left tilt-servo housing","s":[56,37,29],"kb":53,"p":"std"},{"g":"nacelles","n":"tilt-bracket-L-a","d":"Left tilt bracket","s":[73,45,29],"kb":92,"p":"std"},{"g":"nacelles","n":"tilt-bracket-L-b","d":"Left tilt bracket, servo side","s":[73,45,41],"kb":76,"p":"std"},{"g":"nacelles","n":"tilt-bracket-R-a","d":"Right tilt bracket","s":[73,45,29],"kb":92,"p":"std"},{"g":"nacelles","n":"tilt-bracket-R-b","d":"Right tilt bracket, servo side","s":[73,45,41],"kb":75,"p":"std"},{"g":"tail","n":"control-horn-a","d":"Ruddervator control horn","s":[10,7,6],"kb":1,"p":"std"},{"g":"tail","n":"control-horn-b","d":"Ruddervator control horn","s":[20,7,7],"kb":1,"p":"std"},{"g":"tail","n":"pin-a","d":"Small pin","s":[6,5,5],"kb":10,"p":"con"},{"g":"tail","n":"pin-b","d":"Small pin","s":[6,5,5],"kb":10,"p":"con"},{"g":"tail","n":"rear-servo-frame","d":"Rear tilt-servo frame","s":[56,29,4],"kb":43,"p":"std"},{"g":"tail","n":"rear-tilt-bracket-a","d":"Rear motor tilt bracket","s":[73,45,29],"kb":92,"p":"std"},{"g":"tail","n":"rear-tilt-bracket-b","d":"Rear motor tilt bracket, servo side","s":[73,45,41],"kb":76,"p":"std"},{"g":"tail","n":"ruddervator-L","d":"Left ruddervator","s":[149,107,31],"kb":11,"p":"std"},{"g":"tail","n":"ruddervator-R","d":"Right ruddervator","s":[149,107,31],"kb":11,"p":"std"},{"g":"tail","n":"tail-boom-sleeve-1","d":"Tail boom sleeve, front","s":[233,38,38],"kb":161,"p":"std"},{"g":"tail","n":"tail-boom-sleeve-2","d":"Tail boom sleeve, middle","s":[243,38,38],"kb":72,"p":"std"},{"g":"tail","n":"tail-boom-sleeve-3","d":"Tail boom sleeve, rear","s":[257,38,38],"kb":380,"p":"std"},{"g":"tail","n":"tail-mount","d":"Tail mount and rear motor pod","s":[212,93,71],"kb":632,"p":"std"},{"g":"tail","n":"v-tail-L","d":"Left V-tail surface","s":[188,134,71],"kb":1013,"p":"std"},{"g":"tail","n":"v-tail-R","d":"Right V-tail surface","s":[188,134,70],"kb":1011,"p":"std"},{"g":"tail","n":"v-tail-tip-L","d":"Left V-tail tip","s":[100,57,44],"kb":139,"p":"std"},{"g":"tail","n":"v-tail-tip-R","d":"Right V-tail tip","s":[100,57,44],"kb":139,"p":"std"},{"g":"tail","n":"ventral-fin","d":"Ventral fin and rear landing leg","s":[233,211,38],"kb":625,"p":"std"}];
+const PARTS = [{"g":"wing","n":"aileron-L1","d":"Left control surface, inboard","s":[200,50,20],"kb":106,"p":"wing","v":14.53,"vx":20.32,"c":"#d2d2d2"},{"g":"wing","n":"aileron-L2","d":"Left control surface, middle","s":[210,50,20],"kb":344,"p":"wing","v":14.96,"vx":20.65,"c":"#d2d2d2"},{"g":"wing","n":"aileron-L3","d":"Left control surface, outboard","s":[236,50,20],"kb":249,"p":"wing","v":15.92,"vx":22.89,"c":"#d2d2d2"},{"g":"wing","n":"aileron-R1","d":"Right control surface, inboard","s":[200,50,20],"kb":106,"p":"wing","v":14.52,"vx":20.32,"c":"#d2d2d2"},{"g":"wing","n":"aileron-R2","d":"Right control surface, middle","s":[210,50,20],"kb":344,"p":"wing","v":14.97,"vx":20.64,"c":"#d2d2d2"},{"g":"wing","n":"aileron-R3","d":"Right control surface, outboard","s":[236,50,20],"kb":249,"p":"wing","v":15.92,"vx":22.83,"c":"#d2d2d2"},{"g":"wing","n":"boom-mount-L","d":"Left boom mount, under wing","s":[42,34,16],"kb":96,"p":"con","v":6.84,"vx":7.53,"c":"#f47700"},{"g":"wing","n":"boom-mount-R","d":"Right boom mount, under wing","s":[42,34,16],"kb":96,"p":"con","v":6.84,"vx":7.52,"c":"#f47700"},{"g":"wing","n":"wing-panel-L1","d":"Left wing panel, root","s":[252,151,31],"kb":854,"p":"wing","v":63.41,"vx":87.63,"c":"#569fd8"},{"g":"wing","n":"wing-panel-L2","d":"Left wing panel","s":[155,114,23],"kb":403,"p":"wing","v":35.31,"vx":47.83,"c":"#569fd8"},{"g":"wing","n":"wing-panel-L3","d":"Left wing panel","s":[250,114,23],"kb":683,"p":"wing","v":57.75,"vx":78.6,"c":"#569fd8"},{"g":"wing","n":"wing-panel-L4","d":"Left wing panel, tip","s":[259,170,61],"kb":2727,"p":"wing","v":74.43,"vx":96.94,"c":"#569fd8"},{"g":"wing","n":"wing-panel-R1","d":"Right wing panel, root","s":[252,151,31],"kb":854,"p":"wing","v":63.45,"vx":87.55,"c":"#569fd8"},{"g":"wing","n":"wing-panel-R2","d":"Right wing panel","s":[155,114,23],"kb":403,"p":"wing","v":35.37,"vx":47.75,"c":"#569fd8"},{"g":"wing","n":"wing-panel-R3","d":"Right wing panel","s":[250,114,23],"kb":683,"p":"wing","v":57.75,"vx":78.4,"c":"#569fd8"},{"g":"wing","n":"wing-panel-R4","d":"Right wing panel, tip","s":[259,170,61],"kb":2742,"p":"wing","v":74.37,"vx":97.01,"c":"#569fd8"},{"g":"wing","n":"wing-root-plate-L","d":"Left wing root plate","s":[152,45,5],"kb":57,"p":"con","v":15.75,"vx":22.66,"c":"#606060"},{"g":"wing","n":"wing-root-plate-R","d":"Right wing root plate","s":[152,45,5],"kb":54,"p":"con","v":15.74,"vx":22.66,"c":"#606060"},{"g":"fuselage","n":"avionics-tray","d":"Floor plate for PCB and battery","s":[177,139,3],"kb":6,"p":"std","v":27.48,"vx":35.46,"c":"#606060"},{"g":"fuselage","n":"fuselage-center","d":"Center section, wing joint","s":[250,150,94],"kb":1566,"p":"fus","v":108.63,"vx":134.19,"c":"#d2d2d2"},{"g":"fuselage","n":"fuselage-front","d":"Front fuselage section","s":[250,150,69],"kb":12608,"p":"fus","v":107.93,"vx":134.27,"c":"#d2d2d2"},{"g":"fuselage","n":"fuselage-insert","d":"Internal fuselage insert","s":[134,44,29],"kb":1,"p":"std","v":46.64,"vx":48.69,"c":"#000000"},{"g":"fuselage","n":"nose-cone","d":"Streamlined nose cone","s":[178,75,69],"kb":362,"p":"fus","v":31.58,"vx":40.73,"c":"#d2d2d2"},{"g":"fuselage","n":"tail-boom-joiner","d":"Joins tail boom to center section","s":[65,27,27],"kb":11,"p":"con","v":13.48,"vx":13.57,"c":"#8dc2e5"},{"g":"nacelles","n":"boom-fairing-L","d":"Left boom fairing","s":[157,56,37],"kb":538,"p":"std","v":40.9,"vx":41.5,"c":"#569fd8"},{"g":"nacelles","n":"boom-fairing-R","d":"Right boom fairing","s":[157,56,37],"kb":543,"p":"std","v":41.1,"vx":41.51,"c":"#569fd8"},{"g":"nacelles","n":"front-boom-L","d":"Left motor boom with landing leg","s":[235,207,35],"kb":177,"p":"std","v":70.79,"vx":72.67,"c":"#363636"},{"g":"nacelles","n":"front-boom-R","d":"Right motor boom with landing leg","s":[235,235,44],"kb":205,"p":"std","v":84.77,"vx":85.19,"c":"#363636"},{"g":"nacelles","n":"servo-frame-L","d":"Left tilt-servo frame","s":[56,29,4],"kb":43,"p":"std","v":2.01,"vx":2.5,"c":"#ef3e00"},{"g":"nacelles","n":"servo-frame-R","d":"Right tilt-servo frame","s":[56,29,4],"kb":43,"p":"std","v":2.04,"vx":2.5,"c":"#ef3e00"},{"g":"nacelles","n":"servo-housing-L","d":"Left tilt-servo housing","s":[56,37,29],"kb":53,"p":"std","v":16.37,"vx":16.95,"c":"#363636"},{"g":"nacelles","n":"tilt-bracket-L-a","d":"Left tilt bracket","s":[73,45,29],"kb":92,"p":"std","v":11.57,"vx":12.07,"c":"#8dc2e5"},{"g":"nacelles","n":"tilt-bracket-L-b","d":"Left tilt bracket, servo side","s":[73,45,41],"kb":76,"p":"std","v":13.03,"vx":13.42,"c":"#8dc2e5"},{"g":"nacelles","n":"tilt-bracket-R-a","d":"Right tilt bracket","s":[73,45,29],"kb":92,"p":"std","v":11.83,"vx":12.09,"c":"#8dc2e5"},{"g":"nacelles","n":"tilt-bracket-R-b","d":"Right tilt bracket, servo side","s":[73,45,41],"kb":75,"p":"std","v":13.03,"vx":13.13,"c":"#8dc2e5"},{"g":"tail","n":"control-horn-a","d":"Ruddervator control horn","s":[10,7,6],"kb":1,"p":"std","v":0.17,"vx":0.18,"c":"#0b1e74"},{"g":"tail","n":"control-horn-b","d":"Ruddervator control horn","s":[20,7,7],"kb":1,"p":"std","v":0.41,"vx":0.5,"c":"#d2d2d2"},{"g":"tail","n":"pin-a","d":"Small pin","s":[6,5,5],"kb":10,"p":"con","v":0.1,"vx":0.1,"c":"#606060"},{"g":"tail","n":"pin-b","d":"Small pin","s":[6,5,5],"kb":10,"p":"con","v":0.1,"vx":0.1,"c":"#606060"},{"g":"tail","n":"rear-servo-frame","d":"Rear tilt-servo frame","s":[56,29,4],"kb":43,"p":"std","v":2.04,"vx":2.5,"c":"#ef3e00"},{"g":"tail","n":"rear-tilt-bracket-a","d":"Rear motor tilt bracket","s":[73,45,29],"kb":92,"p":"std","v":11.82,"vx":11.98,"c":"#8dc2e5"},{"g":"tail","n":"rear-tilt-bracket-b","d":"Rear motor tilt bracket, servo side","s":[73,45,41],"kb":76,"p":"std","v":12.88,"vx":13.13,"c":"#8dc2e5"},{"g":"tail","n":"ruddervator-L","d":"Left ruddervator","s":[149,107,31],"kb":11,"p":"std","v":12.65,"vx":16.1,"c":"#d2d2d2"},{"g":"tail","n":"ruddervator-R","d":"Right ruddervator","s":[149,107,31],"kb":11,"p":"std","v":12.65,"vx":16.1,"c":"#d2d2d2"},{"g":"tail","n":"tail-boom-sleeve-1","d":"Tail boom sleeve, front","s":[233,38,38],"kb":161,"p":"std","v":61.99,"vx":62.75,"c":"#569fd8"},{"g":"tail","n":"tail-boom-sleeve-2","d":"Tail boom sleeve, middle","s":[243,38,38],"kb":72,"p":"std","v":66.42,"vx":67.56,"c":"#363636"},{"g":"tail","n":"tail-boom-sleeve-3","d":"Tail boom sleeve, rear","s":[257,38,38],"kb":380,"p":"std","v":71.27,"vx":72.46,"c":"#f47700"},{"g":"tail","n":"tail-mount","d":"Tail mount and rear motor pod","s":[212,93,71],"kb":632,"p":"std","v":108.43,"vx":109.62,"c":"#606060"},{"g":"tail","n":"v-tail-L","d":"Left V-tail surface","s":[188,134,71],"kb":1013,"p":"std","v":50.15,"vx":53.59,"c":"#f47700"},{"g":"tail","n":"v-tail-R","d":"Right V-tail surface","s":[188,134,70],"kb":1011,"p":"std","v":50.17,"vx":53.7,"c":"#f47700"},{"g":"tail","n":"v-tail-tip-L","d":"Left V-tail tip","s":[100,57,44],"kb":139,"p":"std","v":11.37,"vx":11.59,"c":"#f47700"},{"g":"tail","n":"v-tail-tip-R","d":"Right V-tail tip","s":[100,57,44],"kb":139,"p":"std","v":11.38,"vx":11.55,"c":"#f47700"},{"g":"tail","n":"ventral-fin","d":"Ventral fin and rear landing leg","s":[233,211,38],"kb":625,"p":"std","v":128.05,"vx":128.6,"c":"#606060"}];
 (function(){
   /* ---------- tabs with hash routing ---------- */
   const tabs=[...document.querySelectorAll('[role=tab]')];
@@ -1163,11 +1264,15 @@ const PARTS = [{"g":"wing","n":"aileron-L1","d":"Left control surface, inboard",
   let group='all';
   grid.innerHTML=PARTS.map(p=>`
     <article class="part" data-g="${p.g}" data-k="${(p.n+' '+p.d+' '+p.g).toLowerCase()}">
-      <div class="thumb"><img src="assets/parts/${p.n}.webp" width="480" height="360" loading="lazy" alt="Render of ${p.n}"></div>
-      <div class="meta">
-        <span class="fn">${p.n}.stl</span>
-        <span class="ds">${p.d}</span>
-        <span class="pf pf-${p.p}">${PROFILE[p.p]}</span>
+      <button type="button" class="part-open" data-n="${p.n}" aria-haspopup="dialog" aria-label="View ${p.n} in 3D, with print settings and weight">
+        <span class="thumb"><img src="assets/parts/${p.n}.webp" width="480" height="360" loading="lazy" alt=""><span class="view3d">View in 3D</span></span>
+        <span class="meta">
+          <span class="fn">${p.n}.stl</span>
+          <span class="ds">${p.d}</span>
+          <span class="pf pf-${p.p}">${PROFILE[p.p]}</span>
+        </span>
+      </button>
+      <div class="meta meta-foot">
         <div class="row">
           <span class="sz">${p.s.join(' × ')} mm</span>
           <a class="get" href="files/cad/stl/${p.g}/${p.n}.stl" download aria-label="Download ${p.n}.stl">STL</a>
@@ -1181,6 +1286,48 @@ const PARTS = [{"g":"wing","n":"aileron-L1","d":"Left control surface, inboard",
     none.hidden=n>0;
     count.textContent=`Showing ${n} ${n===1?'part':'parts'}`+(group!=='all'?` in ${LABEL[group]}`:'');
   }
+  /* ---------- part detail dialog ---------- */
+  // Filament densities (g/cm3). LW values assume full foaming with flow reduced to match.
+  const FIL={'LW-PETG':{d:0.70,lw:1,base:1.27},'LW-PLA':{d:0.54,lw:1,base:1.24},'PETG':{d:1.27},'PLA':{d:1.24},'ASA':{d:1.05},'PETG-CF':{d:1.25},'ASA-CF':{d:1.02}};
+  const PNAME={fus:'Fuselage shell',wing:'Wing',con:'Connector',std:'Standard'};
+  const PWALL={fus:1,wing:1,con:3,std:2}, PINF={fus:'3%',wing:'5%',con:'20%',std:'20%'};
+  const dlg=document.getElementById('partDlg'), fil=document.getElementById('pdFil');
+  const $=id=>document.getElementById(id);
+  const TOTAL=PARTS.reduce((a,p)=>a+p.v,0);
+  let cur=null, opener=null;
+  const fmt=g=>g>=100?Math.round(g).toLocaleString():g>=10?g.toFixed(0):g.toFixed(1);
+  function weigh(){
+    if(!cur) return;
+    const f=FIL[fil.value], g=cur.v*f.d, gx=cur.vx*f.d;
+    $('pdGrams').textContent=`≈ ${fmt(g)} g`;
+    $('pdRange').textContent=(gx/g>1.03)?`${fmt(g)}–${fmt(gx)} g depending on orientation`:`${cur.v.toFixed(1)} cm³ of filament`;
+    $('pdNote').textContent=f.lw
+      ? `Assumes full foaming (${f.d} g/cm³) with flow reduced to match. Printed cooler, LW filament foams less, up to about ${fmt(cur.v*f.base)} g.`
+      : `Sliced with the settings shown, at ${f.d} g/cm³, in the lightest printable orientation.`;
+    $('pdTotal').textContent=`All 53 printed parts: ≈ ${fmt(TOTAL*f.d)} g in ${fil.value}.`;
+  }
+  try{ const saved=localStorage.getItem('rampat-filament'); if(saved&&FIL[saved]) fil.value=saved; }catch(e){}
+  fil.addEventListener('change',()=>{ try{ localStorage.setItem('rampat-filament',fil.value); }catch(e){} weigh(); });
+  function openPart(n,btn){
+    const p=PARTS.find(x=>x.n===n); if(!p) return; cur=p; opener=btn;
+    $('pdGroup').textContent=LABEL[p.g]; $('pdTitle').textContent=p.n; $('pdDesc').textContent=p.d;
+    $('pdProfile').textContent=PNAME[p.p]; $('pdWalls').textContent=PWALL[p.p]; $('pdInfill').textContent=PINF[p.p]+' gyroid';
+    $('pdSize').textContent=p.s.join(' × ')+' mm';
+    const href=`files/cad/stl/${p.g}/${p.n}.stl`;
+    $('pdDl').href=href; $('pdDlText').textContent=`Download ${p.n}.stl`;
+    $('pdThumb').src=`assets/parts/${p.n}.webp`;
+    $('pdView').classList.remove('ready');
+    weigh();
+    dlg.showModal();
+    document.dispatchEvent(new CustomEvent('part-open',{detail:{url:href,color:p.c}}));
+    if(typeof gc==='function') gc({path:'/cad/'+p.n,title:'Part: '+p.n});
+  }
+  grid.addEventListener('click',e=>{ const b=e.target.closest('.part-open'); if(b) openPart(b.dataset.n,b); });
+  $('pdClose').addEventListener('click',()=>dlg.close());
+  // clicking the dimmed area outside the box closes it
+  dlg.addEventListener('click',e=>{ if(e.target===dlg) dlg.close(); });
+  dlg.addEventListener('close',()=>{ document.dispatchEvent(new Event('part-close')); if(opener) opener.focus(); });
+
   chips.forEach(c=>c.addEventListener('click',()=>{
     group=c.dataset.g; chips.forEach(x=>x.setAttribute('aria-pressed',x===c)); filter();
   }));
@@ -1475,6 +1622,59 @@ function start() {
 const panel = document.getElementById('cad');
 if (!panel.hidden) start();
 new MutationObserver(() => { if (!panel.hidden) start(); }).observe(panel, { attributes: true, attributeFilter: ['hidden'] });
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const view=document.getElementById('pdView');
+let renderer,scene,camera,controls,mesh=null,home=null,token=0;
+function init(){
+  renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.outputColorSpace=THREE.SRGBColorSpace;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=0.95;
+  view.prepend(renderer.domElement);
+  scene=new THREE.Scene();
+  scene.environment=new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(),0.04).texture;
+  const sun=new THREE.DirectionalLight(0xffffff,1.3); sun.position.set(-1,2,1.5); scene.add(sun);
+  const fill=new THREE.DirectionalLight(0xdfe8f2,0.6); fill.position.set(1,-1,-1); scene.add(fill);
+  scene.add(new THREE.HemisphereLight(0xffffff,0x8090a8,0.7));
+  camera=new THREE.PerspectiveCamera(30,1,0.1,10000);
+  controls=new OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=true; controls.dampingFactor=0.08; controls.screenSpacePanning=true;
+  renderer.domElement.addEventListener('contextmenu',e=>e.preventDefault());
+  new ResizeObserver(resize).observe(view);
+  renderer.setAnimationLoop(()=>{ if(!view.isConnected||!document.getElementById('partDlg').open) return; controls.update(); renderer.render(scene,camera); });
+}
+function resize(){ const w=view.clientWidth,h=view.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+function frame(){
+  const r=home.r, d=new THREE.Vector3(-0.9,0.65,1.0).normalize().multiplyScalar(r*3.3);
+  camera.position.copy(d); camera.near=r/100; camera.far=r*100; camera.updateProjectionMatrix();
+  controls.target.set(0,0,0); controls.minDistance=r*0.4; controls.maxDistance=r*12; controls.update();
+}
+const loader=new STLLoader();
+document.addEventListener('part-open',e=>{
+  if(!renderer) init(); resize();
+  const my=++token;
+  if(mesh){ scene.remove(mesh); mesh.geometry.dispose(); mesh=null; }
+  loader.load(e.detail.url,geo=>{
+    if(my!==token) return;
+    geo.rotateX(-Math.PI/2);                 // CAD is Z-up; the viewer is Y-up
+    geo.computeBoundingSphere(); const c=geo.boundingSphere.center.clone();
+    geo.translate(-c.x,-c.y,-c.z); geo.computeVertexNormals();
+    const mat=new THREE.MeshStandardMaterial({color:new THREE.Color(e.detail.color),roughness:0.55,metalness:0.05,side:THREE.DoubleSide});
+    mesh=new THREE.Mesh(geo,mat);
+    mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo,30),new THREE.LineBasicMaterial({color:0x0b1626,transparent:true,opacity:0.35})));
+    scene.add(mesh); home={r:geo.boundingSphere.radius}; frame();
+    view.classList.add('ready');
+  },undefined,()=>{});
+});
+document.addEventListener('part-close',()=>{ token++; });
+document.getElementById('pdReset').addEventListener('click',()=>{ if(home) frame(); });
 </script>
 </body>
 </html>
