@@ -39,6 +39,7 @@ img{max-width:100%;height:auto;display:block}
 a{color:#1B5FA8;text-underline-offset:3px}
 :focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:3px}
 .wrap{width:min(1200px,100% - 2.5rem);margin-inline:auto}
+[hidden]{display:none!important}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* ---------- header + tabs ---------- */
@@ -281,6 +282,29 @@ td.num{font-family:var(--mono);font-size:.92rem;white-space:nowrap}
 .v3d-hint{position:absolute;top:0;right:0;margin:0;font-size:.82rem;color:#A9BCD6;transition:opacity .4s}
 .v3d.touched .v3d-hint{opacity:0}
 
+
+/* ---------- CAD part carousel ---------- */
+.pc{min-width:0}
+.pc-stage{position:relative;aspect-ratio:16/10;border-radius:var(--r-lg);background:radial-gradient(ellipse at 50% 45%,#1E3A63 0%,#14294A 70%);border:1px solid var(--navy-line);overflow:hidden;cursor:grab;touch-action:pan-y}
+.pc-stage:active{cursor:grabbing}
+.pc-stage canvas{position:absolute;inset:0;width:100%!important;height:100%!important;transition:opacity .18s}
+.pc-stage canvas.fading{opacity:0}
+.pc-poster{position:absolute;inset:12%;width:76%;height:76%;object-fit:contain;transition:opacity .4s}
+.pc.ready .pc-poster{opacity:0;pointer-events:none}
+.pc-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:var(--navy);display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25);transition:background .15s,transform .15s}
+.pc-arrow:hover{background:#fff;transform:translateY(-50%) scale(1.06)}
+.pc-arrow svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+.pc-arrow.prev{left:12px}.pc-arrow.next{right:12px}
+.pc-foot{display:flex;align-items:center;gap:1rem;margin-top:.9rem}
+.pc-cap{margin:0;display:flex;align-items:baseline;gap:.7rem;flex:1;min-width:0}
+.pc-cap b{font:700 1.5rem/1 var(--display);color:#fff;transition:opacity .18s}
+.pc-cap span{font:500 .85rem var(--mono);color:#A9BCD6}
+.pc-dots{display:flex;gap:.45rem}
+.pc-dots button{width:9px;height:9px;padding:0;border-radius:50%;border:0;background:#4D6A93;cursor:pointer}
+.pc-dots button[aria-current="true"]{background:var(--amber);width:22px;border-radius:5px}
+.pc-pause{appearance:none;background:transparent;border:1px solid var(--navy-line);color:#C9D6E8;font:600 .85rem var(--body);padding:.35rem .75rem;border-radius:999px;cursor:pointer}
+.pc-pause:hover{color:#fff}
+
 /* ---------- footer ---------- */
 footer{background:var(--navy);color:#C9D6E8;padding-block:2.5rem 3rem;font-size:.95rem}
 footer .wrap{display:grid;gap:1.5rem}
@@ -491,7 +515,23 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
         <h1>Modify it, or print it as is.</h1>
         <p>The STEP assembly is for changing the design: fitting a different camera, motor or battery. The STL pack is every part ready for your slicer.</p>
       </div>
-      <figure style="margin:0"><img src="assets/img/cad-model.png" width="706" height="264" alt="Render of a printed wing panel with its spar channels and slot tabs." style="width:100%"></figure>
+      <div class="pc" id="pc" aria-roledescription="carousel" aria-label="Featured parts">
+        <div class="pc-stage" id="pcStage">
+          <img class="pc-poster" src="assets/img/cad-model.png" width="706" height="264" alt="Render of a printed wing panel.">
+          <button type="button" class="pc-arrow prev" id="pcPrev" aria-label="Previous part"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <button type="button" class="pc-arrow next" id="pcNext" aria-label="Next part"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+        <div class="pc-foot">
+          <p class="pc-cap"><b id="pcCap">Wing panel</b><span id="pcNum">1 / 4</span></p>
+          <div class="pc-dots" id="pcDots" role="group" aria-label="Choose a part">
+            <button type="button" aria-label="Wing panel" aria-current="true"></button>
+            <button type="button" aria-label="Fuselage"></button>
+            <button type="button" aria-label="Boom connector"></button>
+            <button type="button" aria-label="Vertical stabilizer"></button>
+          </div>
+          <button type="button" class="pc-pause" id="pcPause" aria-pressed="false">Pause</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -919,7 +959,7 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
         <p style="color:#D5E0EE">One direction is swarms: several aircraft networked together to cover a search area faster.</p>
         <p style="margin-top:1.6rem"><a class="btn" href="files/RAMPAT-poster-2026.pdf" download>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></svg>
-          Download the research poster <small>PDF · 2.9 MB</small></a></p>
+          Download the research poster <small>PDF</small></a></p>
       </div>
       <figure class="plate"><img src="assets/img/swarm.jpg" width="1087" height="829" loading="lazy" alt="Diagram of six aircraft connected by dashed network links."><figcaption>Example swarm network of six aircraft.</figcaption></figure>
     </div>
@@ -1130,6 +1170,130 @@ renderer.setAnimationLoop(() => {
   if (!visible || stage.offsetParent === null) return;
   controls.update(); renderer.render(scene, camera);
 });
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const PARTS = [
+  { file: 'wing-panel', label: 'Wing panel' },
+  { file: 'fuselage', label: 'Fuselage', zoom: 2.5 },
+  { file: 'connector', label: 'Boom connector' },
+  { file: 'vertical-stabilizer', label: 'Vertical stabilizer' },
+];
+const INTERVAL = 4000;
+const root = document.getElementById('pc'), stage = document.getElementById('pcStage');
+const cap = document.getElementById('pcCap'), num = document.getElementById('pcNum');
+const dots = [...document.querySelectorAll('#pcDots button')], pauseBtn = document.getElementById('pcPause');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let started = false;
+function start() {
+  if (started) return; started = true;
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.95;
+  stage.prepend(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+  const sun = new THREE.DirectionalLight(0xffffff, 1.4); sun.position.set(-1, 2, 1.5); scene.add(sun);
+  const fill = new THREE.DirectionalLight(0xcfe0f5, 0.7); fill.position.set(1, -1.2, -0.8); scene.add(fill);
+  scene.add(new THREE.HemisphereLight(0xdbe8f7, 0x50627c, 0.9));
+
+  const camera = new THREE.PerspectiveCamera(30, 1, 1, 20000);
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true; controls.dampingFactor = 0.08;
+  controls.enableZoom = false; controls.enablePan = false;
+  controls.autoRotate = !reduce; controls.autoRotateSpeed = 2.2;
+  renderer.domElement.style.touchAction = 'pan-y';
+
+  function resize() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(stage); resize();
+
+  const models = new Array(PARTS.length);
+  const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
+  let current = 0;
+
+  function frame(m) {
+    const s = new THREE.Box3().setFromObject(m).getBoundingSphere(new THREE.Sphere());
+    m.position.sub(s.center);
+    m.userData.r = s.radius;
+  }
+  function place() {
+    const m = models[current]; if (!m) return;
+    const d = new THREE.Vector3(-0.9, 0.62, 1.0).normalize().multiplyScalar(m.userData.r * (PARTS[current].zoom || 3.4));
+    camera.position.copy(d); controls.target.set(0, 0, 0); controls.update();
+  }
+  function load(i) {
+    return new Promise(res => {
+      if (models[i]) return res(models[i]);
+      loader.load(`assets/models/${PARTS[i].file}.glb`, g => {
+        const m = g.scene; frame(m);
+        m.traverse(o => {
+          if (!o.isMesh) return;
+          o.material.side = THREE.DoubleSide;
+          o.add(new THREE.LineSegments(new THREE.EdgesGeometry(o.geometry, 32),
+            new THREE.LineBasicMaterial({ color: 0x0b1626, transparent: true, opacity: 0.4 })));
+        });
+        m.visible = false; scene.add(m); models[i] = m; res(m);
+      }, undefined, () => res(null));
+    });
+  }
+
+  async function show(i, user) {
+    i = (i + PARTS.length) % PARTS.length;
+    const m = await load(i); if (!m) return;
+    const canvas = renderer.domElement;
+    if (!reduce && root.classList.contains('ready')) { canvas.classList.add('fading'); cap.style.opacity = 0; await new Promise(r => setTimeout(r, 180)); }
+    models.forEach(x => x && (x.visible = false));
+    current = i; m.visible = true; place();
+    cap.textContent = PARTS[i].label; num.textContent = `${i + 1} / ${PARTS.length}`;
+    dots.forEach((d, k) => d.setAttribute('aria-current', k === i));
+    canvas.classList.remove('fading'); cap.style.opacity = 1;
+    root.classList.add('ready');
+    load((i + 1) % PARTS.length);            // preload the next one
+    if (user) restart();
+  }
+
+  // auto-advance every 4 s; any interaction restarts the 4 s wait
+  let timer = null, paused = reduce;
+  function restart() {
+    clearInterval(timer);
+    if (!paused) timer = setInterval(() => { if (stage.offsetParent) show(current + 1); }, INTERVAL);
+  }
+  function setPaused(p) { paused = p; pauseBtn.setAttribute('aria-pressed', p); pauseBtn.textContent = p ? 'Play' : 'Pause'; restart(); }
+  setPaused(paused);
+
+  document.getElementById('pcPrev').addEventListener('click', () => show(current - 1, true));
+  document.getElementById('pcNext').addEventListener('click', () => show(current + 1, true));
+  dots.forEach((d, k) => d.addEventListener('click', () => show(k, true)));
+  pauseBtn.addEventListener('click', () => setPaused(!paused));
+  renderer.domElement.addEventListener('pointerdown', () => restart());
+  controls.addEventListener('change', () => { if (controls.dragging) restart(); });
+  controls.addEventListener('start', () => { controls.dragging = true; clearInterval(timer); });
+  controls.addEventListener('end', () => { controls.dragging = false; restart(); });
+
+  show(0);
+  renderer.setAnimationLoop(() => {
+    if (stage.offsetParent === null) return;
+    controls.update(); renderer.render(scene, camera);
+  });
+}
+
+// only start once the CAD tab is opened
+const panel = document.getElementById('cad');
+if (!panel.hidden) start();
+new MutationObserver(() => { if (!panel.hidden) start(); }).observe(panel, { attributes: true, attributeFilter: ['hidden'] });
 </script>
 </body>
 </html>
