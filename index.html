@@ -305,13 +305,32 @@ td.num{font-family:var(--mono);font-size:.92rem;white-space:nowrap}
 .pc-pause{appearance:none;background:transparent;border:1px solid var(--navy-line);color:#C9D6E8;font:600 .85rem var(--body);padding:.35rem .75rem;border-radius:999px;cursor:pointer}
 .pc-pause:hover{color:#fff}
 
+
+/* ---------- FAQ ---------- */
+.faq-layout{display:grid;gap:2.5rem;align-items:start}
+@media (min-width:900px){.faq-layout{grid-template-columns:8fr 4fr}.contact{position:sticky;top:90px}}
+.faq-layout > *{min-width:0}
+.faq-list{border-top:1px solid var(--line)}
+.faq-item{border-bottom:1px solid var(--line)}
+.faq-item summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1.2rem 0;font:700 1.3rem/1.2 var(--display);letter-spacing:.005em}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:"";flex:none;width:10px;height:10px;border-right:2.5px solid var(--ink);border-bottom:2.5px solid var(--ink);transform:translateY(-3px) rotate(45deg);transition:transform .2s}
+.faq-item[open] summary::after{transform:translateY(2px) rotate(225deg)}
+.faq-item summary:hover{color:#1B5FA8}
+.faq-item p{margin:0 0 1.3rem;color:var(--muted);max-width:44em}
+.contact{background:var(--navy);color:#fff;border-radius:var(--r-lg);padding:1.8rem}
+.contact h2{color:#fff;font-size:2rem}
+.contact p{color:#C9D6E8}
+.contact .btn{margin-top:.4rem}
+.contact-addr{font:500 .95rem var(--mono);margin:.9rem 0 0;word-break:break-all}
+
 /* ---------- footer ---------- */
 footer{background:var(--navy);color:#C9D6E8;padding-block:2.5rem 3rem;font-size:.95rem}
 footer .wrap{display:grid;gap:1.5rem}
 @media (min-width:800px){footer .wrap{grid-template-columns:2fr 1fr 1fr}}
 footer b{color:#fff;font:700 1.25rem var(--display);letter-spacing:.04em}
 footer a{color:#fff}
-footer ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
+footer ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem;align-content:start}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -327,6 +346,7 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
       <button class="tab" role="tab" id="t-pcb" aria-controls="pcb" aria-selected="false" tabindex="-1">PCB design</button>
       <button class="tab" role="tab" id="t-cfd" aria-controls="cfd" aria-selected="false" tabindex="-1">CFD</button>
       <button class="tab" role="tab" id="t-results" aria-controls="results" aria-selected="false" tabindex="-1">Results</button>
+      <button class="tab" role="tab" id="t-faq" aria-controls="faq" aria-selected="false" tabindex="-1">FAQ</button>
     </nav>
     <a class="btn" href="files/RAMPAT-all-files.zip" download>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></svg>
@@ -966,6 +986,77 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
   </section>
 </section>
 
+<!-- =========================================================
+     FAQ + CONTACT
+     ========================================================= -->
+<section id="faq" role="tabpanel" aria-labelledby="t-faq" tabindex="-1" hidden>
+  <div class="phero">
+    <div class="wrap">
+      <div>
+        <span class="crumb">FAQ</span>
+        <h1>Questions and answers.</h1>
+        <p>Common questions about building, flying and using R.A.M.P.A.T. If yours isn't here, send an email.</p>
+      </div>
+    </div>
+  </div>
+
+  <section class="band">
+    <div class="wrap faq-layout">
+      <div class="faq-list">
+        <details class="faq-item" open>
+          <summary>What is R.A.M.P.A.T.?</summary>
+          <p>A 3D-printed tiltrotor drone built for emergency response. It takes off and lands vertically like a multirotor, then tilts its three rotors forward to fly efficiently on its wing. It carries a thermal camera for search and damage assessment, and costs under $1,000 to build.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How much does it cost to build?</summary>
+          <p>The prototype's materials came to $978, including the printed airframe, motors, servos, ESCs, battery, carbon tubes and the custom flight controller. Your total will depend on where you buy parts and what you already own.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What do I need to print it?</summary>
+          <p>LW-PETG filament and a printer that handles it. The largest parts are about 257 mm long, so check that they fit on your bed in your slicer before you start. Print settings for each part are on the <a href='#cad'>CAD tab</a>.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How long does the build take?</summary>
+          <p>Under 48 hours in total, including printing and sourcing parts.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How long can it fly?</summary>
+          <p>About 178 minutes in testing, covering a search area of around 1,900 acres. Endurance depends on airspeed, payload and battery condition; the <a href='#cfd'>CFD tab</a> shows how airspeed affects it.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Which flight controller does it use?</summary>
+          <p>A custom four-layer PCB designed for this aircraft. The Gerber files on the <a href='#pcb'>PCB tab</a> can be uploaded directly to a fab such as PCBWay or JLCPCB.</p>
+        </details>
+        <details class="faq-item">
+          <summary>I broke a part. Do I need to reprint everything?</summary>
+          <p>No. Every printed part is its own STL file, so you can download and reprint only the part you need from the parts gallery on the <a href='#cad'>CAD tab</a>.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I modify the design?</summary>
+          <p>Yes. Download the STEP assembly on the <a href='#cad'>CAD tab</a> and open it in Onshape, Fusion, SolidWorks or FreeCAD. If you share your version, credit the original project.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I sell aircraft or parts based on this design?</summary>
+          <p>No. The design is licensed under <a href='https://creativecommons.org/licenses/by-nc/4.0/'>CC BY-NC 4.0</a>, which allows sharing and adapting with credit but not commercial use. For other uses, get in touch using the email below.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is it legal to fly?</summary>
+          <p>That depends on where you are. It weighs well over 250 g, so many countries require registration; in the US, that means registering with the FAA. Always fly within your local rules and keep the aircraft in line of sight.</p>
+        </details>
+      </div>
+      <aside class="contact" aria-labelledby="contact-h">
+        <h2 id="contact-h">Contact</h2>
+        <p>Questions about the build, ideas for the design, or interest in using R.A.M.P.A.T. for emergency response work.</p>
+        <a class="btn" href="mailto:dixitaarit@gmail.com">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+          Email Aarit
+        </a>
+        <p class="contact-addr">dixitaarit@gmail.com</p>
+      </aside>
+    </div>
+  </section>
+</section>
+
 </main>
 
 <footer>
@@ -982,10 +1073,10 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
       <li><a href="#pcb">PCB design</a></li>
       <li><a href="#cfd">CFD</a></li>
       <li><a href="#results">Results</a></li>
+      <li><a href="#faq">FAQ and contact</a></li>
     </ul>
     <ul>
-      <li><a href="https://github.com/TheCoder314/RAMPAT-TheCoder314.github.io">GitHub repository</a></li>
-      <li><a href="https://github.com/TheCoder314/RAMPAT-TheCoder314.github.io/issues">Report a problem</a></li>
+      <li><a href="mailto:dixitaarit@gmail.com">dixitaarit@gmail.com</a></li>
       <li><a href="files/RAMPAT-all-files.zip" download>Download all files</a></li>
     </ul>
   </div>
