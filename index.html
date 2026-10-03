@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>R.A.M.P.A.T. | Open-source 3D-printed tiltrotor VTOL</title>
+<meta name="description" content="R.A.M.P.A.T. is a 3D-printed tiltrotor VTOL for emergency response. Download the STEP assembly, printable STL parts, flight controller PCB files and CFD results.">
+<meta property="og:title" content="R.A.M.P.A.T. | 3D-printed tiltrotor VTOL">
+<meta property="og:description" content="Free STEP, STL and PCB files for a sub-$1,000 tiltrotor built for first responders.">
+<meta property="og:image" content="assets/img/aircraft-final.png">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230F2340'/%3E%3Cpath d='M8 36h48' stroke='%239DC3E6' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M16 36V20M48 36V20M10 20h12M42 20h12' stroke='%23FFA826' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!--
+  EDIT CHECKLIST
+  - Replace TheCoder314/RAMPAT-TheCoder314.github.io with your GitHub repo path.
+  - After changing source files, rebuild the ZIPs: python3 tools/build_zips.py
+-->
+
+<style>
+:root{
+  --navy:#0F2340; --navy-2:#173156; --navy-line:#2A4570;
+  --page:#F2F4F6; --card:#FFFFFF; --ink:#13223A; --muted:#566579; --line:#D7DEE6;
+  --sky:#9DC3E6; --sky-tint:#E4EFF8;
+  --amber:#FFA826; --amber-ink:#13223A; --amber-deep:#B86A00;
+  --pcb:#1F7A4D; --pcb-tint:#E2F2E9;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r-sm:4px; --r-md:10px; --r-lg:18px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:76px}
+body{margin:0;background:var(--page);color:var(--ink);font:400 1.0625rem/1.6 var(--body);-webkit-font-smoothing:antialiased}
+img{max-width:100%;height:auto;display:block}
+a{color:#1B5FA8;text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:3px}
+.wrap{width:min(1200px,100% - 2.5rem);margin-inline:auto}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- header + tabs ---------- */
+.top{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;border-bottom:1px solid var(--navy-line)}
+.top .wrap{display:flex;align-items:center;gap:1.5rem;height:64px}
+.mark{font:800 1.45rem/1 var(--display);letter-spacing:.04em;color:#fff;text-decoration:none;white-space:nowrap}
+.mark span{color:var(--amber)}
+.tabs{display:flex;gap:.25rem;flex:1;overflow-x:auto;scrollbar-width:none;height:100%}
+.tabs::-webkit-scrollbar{display:none}
+.tab{appearance:none;background:none;border:0;color:#C9D6E8;font:600 1.02rem var(--body);padding:0 .95rem;height:100%;cursor:pointer;position:relative;white-space:nowrap}
+.tab:hover{color:#fff}
+.tab[aria-selected="true"]{color:#fff}
+.tab[aria-selected="true"]::after{content:"";position:absolute;left:.7rem;right:.7rem;bottom:0;height:4px;border-radius:4px 4px 0 0;background:var(--amber)}
+.top .btn{flex:none}
+@media (max-width:820px){
+  .top .wrap{height:auto;flex-wrap:wrap;gap:0 1rem;padding-top:.7rem}
+  .top .btn{margin-left:auto;padding:.55rem .9rem;font-size:.92rem}
+  .tabs{order:3;flex-basis:100%;height:48px;margin-inline:-.6rem}
+}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;gap:.55rem;font:700 1rem/1 var(--body);padding:.9rem 1.3rem;border-radius:var(--r-sm);border:0;background:var(--amber);color:var(--amber-ink);text-decoration:none;cursor:pointer;transition:background .15s}
+.btn:hover{background:#FFBC57}
+.btn svg{width:18px;height:18px;flex:none}
+.btn.ghost{background:transparent;color:#fff;box-shadow:inset 0 0 0 2px #fff}
+.btn.ghost:hover{background:rgba(255,255,255,.1)}
+.btn.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.btn.line:hover{background:var(--sky-tint)}
+.btn small{font:500 .82rem var(--mono);opacity:.75}
+
+/* ---------- panels ---------- */
+[role=tabpanel]{outline:none}
+[role=tabpanel][hidden]{display:none}
+.band{padding-block:clamp(3rem,7vw,5.5rem)}
+.band:not(.white):not(.navy) + .band:not(.white):not(.navy){padding-top:0}
+.band.white{background:var(--card);border-block:1px solid var(--line)}
+.band.white + .band{padding-top:clamp(3rem,7vw,5.5rem)}
+.band.navy{background:var(--navy);color:#fff}
+.band.navy + .band{padding-top:clamp(3rem,7vw,5.5rem)}
+h1,h2,h3{font-family:var(--display);line-height:1.02;margin:0;letter-spacing:.005em}
+h1{font-weight:800;font-size:clamp(2.6rem,5.8vw,4.9rem);text-wrap:balance}
+h2{font-weight:700;font-size:clamp(2rem,3.8vw,3rem);margin-bottom:.9rem;text-wrap:balance}
+h3{font-weight:700;font-size:1.5rem;margin-bottom:.4rem}
+.lead{font-size:1.2rem;max-width:36em;color:var(--muted);margin:0 0 2rem}
+.navy .lead{color:#C9D6E8}
+p{margin:0 0 1rem;max-width:42em}
+.head{margin-bottom:2.2rem}
+
+/* page hero for inner tabs */
+.phero{background:var(--navy);color:#fff;padding-block:clamp(2.5rem,6vw,4.5rem)}
+.phero .wrap{display:grid;gap:2.5rem;align-items:center}
+.phero .wrap > *{min-width:0}
+@media (min-width:960px){.phero .wrap{grid-template-columns:6fr 6fr}}
+.phero h1{font-size:clamp(2.6rem,5.4vw,4.4rem);margin-bottom:1rem}
+.phero p{color:#C9D6E8;font-size:1.15rem;max-width:32em}
+.crumb{font:500 .95rem var(--mono);color:var(--amber);margin-bottom:.9rem;display:block}
+
+/* ---------- overview hero ---------- */
+.hero{background:var(--navy);color:#fff;overflow:hidden;position:relative}
+.hero > .wrap{display:grid;gap:1rem;align-items:center;padding-block:clamp(3rem,7vw,5rem) 0}
+@media (min-width:1000px){.hero > .wrap{grid-template-columns:5fr 7fr;padding-bottom:clamp(3rem,6vw,4.5rem)}}
+.acronym{display:flex;flex-wrap:wrap;gap:.35rem .9rem;margin:0 0 1.4rem;padding:0;list-style:none;font:600 1.05rem var(--display);letter-spacing:.03em;color:#C9D6E8}
+.acronym b{color:var(--amber);font-weight:800}
+.hero h1{margin-bottom:1.2rem}
+.hero .lead{color:#D5E0EE}
+.hero .cta{display:flex;flex-wrap:wrap;gap:.8rem}
+.hero figure{margin:0 -4% 0 0;position:relative}
+.hero figure img{width:112%;max-width:none;filter:drop-shadow(0 30px 40px rgba(0,0,0,.35))}
+@media (max-width:999px){.hero figure img{width:100%}.hero figure{margin:0}}
+
+.specs{background:var(--navy-2);color:#fff;border-top:1px solid var(--navy-line)}
+.specs dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin:0}
+.specs div{padding:1.15rem 1rem 1.2rem;border-left:1px solid var(--navy-line)}
+.specs div:first-child{border-left:0;padding-left:0}
+.specs dt{font-size:.88rem;color:#A9BCD6}
+.specs dd{margin:.1rem 0 0;font:700 1.65rem/1.1 var(--display)}
+@media (max-width:700px){.specs div{border-left:0;border-top:1px solid var(--navy-line);padding-left:0}.specs dl{grid-template-columns:1fr 1fr}}
+
+/* ---------- download cards ---------- */
+.dl-main{display:grid;gap:2rem;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:clamp(1.5rem,4vw,2.5rem);align-items:center}
+@media (min-width:900px){.dl-main{grid-template-columns:7fr 5fr}}
+.dl-main h2{margin-bottom:.5rem}
+.contents{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.contents li{display:grid;grid-template-columns:1fr auto;gap:1rem;padding:.75rem 0;border-bottom:1px solid var(--line)}
+.contents b{font-weight:600}
+.contents span{font:400 .9rem var(--mono);color:var(--muted);white-space:nowrap}
+.contents em{display:block;font-style:normal;color:var(--muted);font-size:.95rem}
+.dl-action{display:flex;flex-direction:column;gap:.8rem;align-items:flex-start}
+.dl-action .btn{font-size:1.1rem;padding:1.1rem 1.5rem}
+.fine{font-size:.92rem;color:var(--muted);margin:0}
+
+.dl-pair{display:grid;gap:1.25rem}
+@media (min-width:800px){.dl-pair{grid-template-columns:1fr 1fr}}
+.dl-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:1.6rem;display:flex;flex-direction:column;gap:1rem}
+.dl-card .fmt{display:inline-block;font:500 .82rem var(--mono);padding:.2rem .5rem;border-radius:var(--r-sm);background:var(--sky-tint);color:#1B4F86;align-self:flex-start}
+.dl-card .fmt.pcb{background:var(--pcb-tint);color:var(--pcb)}
+.dl-card h3{font-size:1.65rem;margin:0}
+.dl-card p{color:var(--muted);margin:0}
+.dl-card ul{margin:0;padding-left:1.1rem;color:var(--ink)}
+.dl-card .btn{margin-top:auto;align-self:flex-start}
+
+/* ---------- steps (real sequences only) ---------- */
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:1.25rem;counter-reset:s}
+@media (min-width:900px){.steps.four{grid-template-columns:repeat(4,1fr)}}
+.steps > li{counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:1.4rem}
+.steps > li::before{content:counter(s);display:grid;place-items:center;width:2.3rem;height:2.3rem;border-radius:50%;background:var(--navy);color:var(--amber);font:800 1.15rem var(--display);margin-bottom:.9rem}
+.steps h3{font-size:1.35rem}
+.steps p{color:var(--muted);margin:0;font-size:1rem}
+
+/* timeline (design iterations, PCB process) */
+.timeline{list-style:none;margin:0;padding:0;counter-reset:t}
+.timeline > li{counter-increment:t;display:grid;gap:1.5rem 2.5rem;padding:2.2rem 0;border-top:1px solid var(--line);align-items:center}
+.timeline > li:first-child{border-top:0;padding-top:0}
+@media (min-width:900px){.timeline > li{grid-template-columns:5fr 7fr}.timeline > li.flip > :first-child{order:2}}
+.timeline .num{font:800 .95rem var(--mono);color:var(--amber-deep);display:block;margin-bottom:.4rem}
+.timeline .num::before{content:"Step " counter(t)}
+.timeline.iter .num::before{content:"Iteration " counter(t)}
+.timeline h3{font-size:1.9rem;margin-bottom:.7rem}
+.timeline p{color:var(--muted)}
+.plate{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:1rem;margin:0}
+.plate.dark{background:var(--navy);border-color:var(--navy)}
+.plate img{margin-inline:auto}
+figcaption{font-size:.88rem;color:var(--muted);margin-top:.7rem}
+.plate.dark figcaption{color:#A9BCD6}
+.tag-out{display:inline-block;font:600 .9rem var(--body);padding:.2rem .6rem;border-radius:999px;background:var(--sky-tint);color:#1B4F86;margin-top:.3rem}
+.tag-out.ok{background:#E3F4EA;color:var(--pcb)}
+
+/* two-up figure grid */
+.grid2{display:grid;gap:1.25rem}
+@media (min-width:860px){.grid2{grid-template-columns:1fr 1fr}}
+.grid2 > *,.grid3 > *,.split > *,.dl-pair > *{min-width:0}
+.grid3{display:grid;gap:1.25rem}
+@media (min-width:900px){.grid3{grid-template-columns:repeat(3,1fr)}}
+.split{display:grid;gap:2rem 3rem;align-items:center}
+@media (min-width:900px){.split{grid-template-columns:5fr 7fr}}
+
+/* stat callouts used only where the number is the point */
+.stat{border-left:4px solid var(--amber);padding-left:1rem}
+.stat b{display:block;font:800 2.6rem/1 var(--display)}
+.stat span{color:var(--muted)}
+.navy .stat span,.phero .stat span{color:#C9D6E8}
+.stats{display:grid;gap:1.5rem;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-top:2rem}
+
+/* mode strip */
+.modes{display:grid;gap:1rem;grid-template-columns:repeat(3,1fr);margin-top:1.4rem}
+.modes div{border-top:3px solid var(--sky);padding-top:.6rem}
+.modes b{font:700 1.3rem var(--display);display:block}
+.modes span{font-size:.95rem;color:var(--muted)}
+
+/* ---------- CAD gallery ---------- */
+.legend{display:flex;flex-wrap:wrap;gap:.6rem;margin:1.2rem 0 0}
+.chip{appearance:none;display:inline-flex;align-items:center;gap:.5rem;font:600 .98rem var(--body);padding:.5rem .95rem;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.chip i{width:.85rem;height:.85rem;border-radius:50%;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.chip small{font:500 .82rem var(--mono);color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.chip[aria-pressed="true"] small{color:#A9BCD6}
+.chip:hover{border-color:var(--ink)}
+.toolbar{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;margin:2rem 0 1.25rem}
+.search{display:flex;align-items:center;gap:.5rem;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:0 .8rem;min-width:min(320px,100%)}
+.search input{border:0;outline:0;background:transparent;font:500 1rem var(--body);padding:.65rem 0;flex:1;color:var(--ink)}
+.search:focus-within{border-color:var(--ink)}
+.parts{display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+@media (max-width:560px){.parts{grid-template-columns:1fr 1fr;gap:.6rem}.part .row{flex-wrap:wrap}.part .fn{font-size:.8rem}}
+.part{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;display:flex;flex-direction:column}
+.part .thumb{background:linear-gradient(#F7F9FB,#EBEFF4);aspect-ratio:4/3}
+.part .thumb img{width:100%;height:100%;object-fit:contain}
+.part .meta{padding:.8rem .9rem .9rem;display:flex;flex-direction:column;gap:.15rem;flex:1}
+.part .fn{font:500 .9rem var(--mono);word-break:break-all}
+.part .ds{font-size:.92rem;color:var(--muted)}
+.part .row{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:.6rem;gap:.5rem}
+.pf{align-self:flex-start;margin-top:.35rem;font:500 .76rem var(--mono);padding:.15rem .45rem;border-radius:var(--r-sm);background:#EEF2F6;color:var(--muted)}
+.pf-fus{background:#F1F1F1;color:#4A4F57}.pf-wing{background:var(--sky-tint);color:#1B4F86}.pf-con{background:#FFF0D6;color:#8A5200}
+.part .sz{font:400 .78rem var(--mono);color:var(--muted)}
+.part a.get{font:600 .9rem var(--body);color:var(--ink);text-decoration:none;padding:.35rem .65rem;border-radius:var(--r-sm);box-shadow:inset 0 0 0 1.5px var(--ink);white-space:nowrap}
+.part a.get:hover{background:var(--amber);box-shadow:inset 0 0 0 1.5px var(--amber)}
+.empty{padding:2rem;text-align:center;color:var(--muted);background:var(--card);border:1px dashed var(--line);border-radius:var(--r-md)}
+
+/* tables */
+.tbl{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md)}
+table{width:100%;border-collapse:collapse;min-width:560px;font-size:.98rem}
+th,td{text-align:left;padding:.8rem 1rem;border-top:1px solid var(--line);vertical-align:top}
+thead th{border-top:0;background:#F6F8FA;font-weight:600;font-size:.9rem;color:var(--muted)}
+tbody th{font-weight:600}
+tr.us{background:#FFF6E6}
+td.num{font-family:var(--mono);font-size:.92rem;white-space:nowrap}
+
+/* ---------- PCB loop ---------- */
+.loop{list-style:none;margin:1.4rem 0 0;padding:0;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.loop li{background:var(--card);border:1.5px solid var(--navy);border-radius:var(--r-sm);padding:.45rem .75rem;font:600 .95rem var(--body)}
+.loop li.arrow{border:0;background:none;padding:0 .1rem;color:var(--muted);font-weight:400}
+.loop li.back{border-style:dashed;color:var(--muted)}
+.kv{margin:0;display:grid;grid-template-columns:auto 1fr;gap:.45rem 1.2rem;font-size:.98rem}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font:500 .95rem var(--mono)}
+.eq{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:1.2rem}
+.eq img{max-height:64px;width:auto;margin:0 0 .9rem}
+.eq dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:.25rem .9rem;font-size:.95rem}
+.eq dt{font:500 .92rem var(--mono)}
+.eq dd{margin:0;color:var(--muted)}
+
+/* ---------- CFD viewer ---------- */
+.viewer{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.v-controls{display:flex;flex-wrap:wrap;gap:1rem 2rem;align-items:center;justify-content:space-between;padding:1.1rem 1.3rem;border-bottom:1px solid var(--line)}
+.seg{display:inline-flex;background:#EDF1F5;border-radius:999px;padding:4px;gap:2px}
+.seg button{appearance:none;border:0;background:transparent;font:600 .98rem var(--body);color:var(--ink);padding:.5rem 1rem;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+.seg button:hover:not([aria-pressed="true"]){background:#DCE4ED}
+.v-label{font:500 .95rem var(--mono);color:var(--muted)}
+.v-stage{aspect-ratio:2.25/1;background:#F7F9FB;display:grid;place-items:center;padding:1rem}
+.v-stage img{max-height:100%;width:auto;object-fit:contain;transition:opacity .25s}
+.v-foot{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;padding:1rem 1.3rem;border-top:1px solid var(--line)}
+.scale{display:flex;align-items:center;gap:.6rem;font-size:.9rem;color:var(--muted)}
+.scale img{width:200px;height:12px;border-radius:2px}
+.speed-range{display:flex;align-items:center;gap:.8rem;flex:1;min-width:240px}
+.speed-range input{flex:1;accent-color:var(--navy)}
+
+.compare{display:grid;gap:1.25rem;align-items:stretch}
+@media (min-width:900px){.compare{grid-template-columns:1fr auto 1fr}}
+.compare .vs{display:grid;place-items:center;text-align:center;padding:1rem}
+.compare .vs b{font:800 3.2rem/1 var(--display);color:var(--amber-deep)}
+.compare .vs span{display:block;color:var(--muted);font-size:.95rem}
+.compare figure img{aspect-ratio:1.62/1;object-fit:contain;width:100%;background:#F4F4F4}
+
+/* ---------- footer ---------- */
+footer{background:var(--navy);color:#C9D6E8;padding-block:2.5rem 3rem;font-size:.95rem}
+footer .wrap{display:grid;gap:1.5rem}
+@media (min-width:800px){footer .wrap{grid-template-columns:2fr 1fr 1fr}}
+footer b{color:#fff;font:700 1.25rem var(--display);letter-spacing:.04em}
+footer a{color:#fff}
+footer ul{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="#overview">R.A.M.P.A.T<span>.</span></a>
+    <nav class="tabs" role="tablist" aria-label="Site sections">
+      <button class="tab" role="tab" id="t-overview" aria-controls="overview" aria-selected="true">Overview</button>
+      <button class="tab" role="tab" id="t-cad" aria-controls="cad" aria-selected="false" tabindex="-1">CAD</button>
+      <button class="tab" role="tab" id="t-pcb" aria-controls="pcb" aria-selected="false" tabindex="-1">PCB design</button>
+      <button class="tab" role="tab" id="t-cfd" aria-controls="cfd" aria-selected="false" tabindex="-1">CFD</button>
+      <button class="tab" role="tab" id="t-results" aria-controls="results" aria-selected="false" tabindex="-1">Results</button>
+    </nav>
+    <a class="btn" href="files/RAMPAT-all-files.zip" download>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></svg>
+      Download all
+    </a>
+  </div>
+</header>
+
+<main>
+
+<!-- =========================================================
+     OVERVIEW
+     ========================================================= -->
+<section id="overview" role="tabpanel" aria-labelledby="t-overview" tabindex="-1">
+
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <ul class="acronym" aria-label="R.A.M.P.A.T. stands for">
+          <li><b>R</b>apid</li><li><b>A</b>ffordable</li><li><b>M</b>odular</li><li><b>P</b>rinted</li><li><b>A</b>erial</li><li><b>T</b>iltrotor</li>
+        </ul>
+        <h1>A 3D-printed tiltrotor built for first responders.</h1>
+        <p class="lead">R.A.M.P.A.T. takes off vertically, tilts its rotors forward to cruise on its wing, and costs under $1,000 to build. The CAD, printable parts and flight controller PCB are free to download.</p>
+        <div class="cta">
+          <a class="btn" href="files/RAMPAT-all-files.zip" download>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></svg>
+            Download all files <small>ZIP · 19 MB</small>
+          </a>
+          <a class="btn ghost" href="#cad">Browse the CAD</a>
+        </div>
+      </div>
+      <figure>
+        <img src="assets/img/aircraft-final.png" width="1163" height="693" alt="Render of R.A.M.P.A.T. with its light blue printed wing, white fuselage, V-tail and three orange tilting motor nacelles.">
+      </figure>
+    </div>
+    <div class="specs">
+      <div class="wrap">
+        <dl>
+          <div><dt>Wingspan</dt><dd>1,742 mm</dd></div>
+          <div><dt>Airfoil</dt><dd>NACA 6409</dd></div>
+          <div><dt>Lift to drag</dt><dd>12.1</dd></div>
+          <div><dt>Flight time</dt><dd>178 min</dd></div>
+          <div><dt>Search area</dt><dd>1,900 acres</dd></div>
+          <div><dt>Materials cost</dt><dd>$978</dd></div>
+          <div><dt>LW-PETG parts</dt><dd>53</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="dl-main">
+        <div>
+          <h2>Everything in one download</h2>
+          <p class="lead" style="margin-bottom:1.4rem">One ZIP with the files you need to modify, print and wire the aircraft.</p>
+          <ul class="contents">
+            <li><div><b>CAD / STEP</b><em>Full Onshape assembly, ready to modify</em></div><span>1 file</span></li>
+            <li><div><b>CAD / STL</b><em>Every printable part, sorted by wing, fuselage, nacelles and tail</em></div><span>53 files</span></li>
+            <li><div><b>PCB</b><em>Flight controller Gerber and drill files, ready for a PCB fab</em></div><span>4-layer</span></li>
+            <li><div><b>Poster</b><em>Full research poster, 2026</em></div><span>PDF</span></li>
+          </ul>
+        </div>
+        <div class="dl-action">
+          <a class="btn" href="files/RAMPAT-all-files.zip" download>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></svg>
+            Download all files
+          </a>
+          <p class="fine">RAMPAT-all-files.zip · 19 MB</p>
+          <p class="fine">Only need part of it? Get the <a href="#cad">CAD files</a> or <a href="#pcb">PCB files</a> on their own tabs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="head">
+        <h2>From download to first flight</h2>
+        <p class="lead">Total build time, including printing and sourcing parts, is under 48 hours.</p>
+      </div>
+      <ol class="steps four">
+        <li><h3>Download</h3><p>Get the full file set, or just the STL pack if you are printing an unmodified airframe.</p></li>
+        <li><h3>Print</h3><p>Print the 53 parts in LW-PETG. Left and right parts are separate mirrored files, so print each file once.</p></li>
+        <li><h3>Build and wire</h3><p>Slot the parts onto the carbon tubes, then fit the motors, tilt servos, battery and flight controller PCB.</p></li>
+        <li><h3>Test and fly</h3><p>Hover test first, then transition, then fixed-wing cruise. The full procedure is on the <a href="#results">Results</a> tab.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap split">
+      <div>
+        <h2>One set of rotors for hover and cruise</h2>
+        <p>Most VTOL drones carry separate motors for hovering and for forward flight. R.A.M.P.A.T. tilts the same three rotors between both, which cuts weight and cost.</p>
+        <p>A servo-driven tilt mechanism in each nacelle sets the motor angle for each flight mode. Tiltrotors exist, but this is the first 3D-printed tiltrotor built for disaster response.</p>
+        <div class="modes">
+          <div><b>Hover</b><span>Rotors up for vertical takeoff and landing</span></div>
+          <div><b>Transition</b><span>Rotors tilt as the wing builds lift</span></div>
+          <div><b>Cruise</b><span>Rotors forward, flying on the wing</span></div>
+        </div>
+      </div>
+      <figure class="plate dark">
+        <img src="assets/img/tilt-modes.png" width="459" height="167" alt="Three renders of the nacelle tilt mechanism, rotor pointing up, at 45 degrees and forward." style="width:100%">
+        <figcaption>Tilt mechanism in hover, transition and cruise positions.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="head">
+        <h2>How the design got here</h2>
+        <p class="lead">Three airframes, each rebuilt around what the last one got wrong.</p>
+      </div>
+      <ol class="timeline iter">
+        <li>
+          <div>
+            <span class="num"></span>
+            <h3>Foam and cardboard</h3>
+            <p>A low-cost VTOL built from foam and cardboard. It was too fragile to fly stably, but it proved the concept was worth pursuing.</p>
+            <span class="tag-out">Proof of concept</span>
+          </div>
+          <figure class="plate"><img src="assets/img/iteration-1.jpg" width="1024" height="768" loading="lazy" alt="Photo of the first foam and cardboard prototype on a workbench."><figcaption>Photo by the researcher, 2024.</figcaption></figure>
+        </li>
+        <li class="flip">
+          <div>
+            <span class="num"></span>
+            <h3>Modular 3D-printed parts</h3>
+            <p>The airframe moved to modular printed parts. Testing showed a misaligned center of gravity, high drag, and structural instability from the wooden spars.</p>
+            <span class="tag-out">Airframe and aerodynamics needed a full revision</span>
+          </div>
+          <figure class="plate dark"><img src="assets/img/iteration-2.png" width="941" height="553" loading="lazy" alt="Render of the second iteration with a straight wing and a boxy fuselage."><figcaption>Onshape render, 2025.</figcaption></figure>
+        </li>
+        <li>
+          <div>
+            <span class="num"></span>
+            <h3>Carbon fiber and CFD</h3>
+            <p>Wooden spars and booms became carbon fiber for strength, weight and correct balance. CFD drove a streamlined fuselage and a V-tail, and a part-slotting system holds it all together.</p>
+            <span class="tag-out ok">Stable structure and flight performance</span>
+          </div>
+          <figure class="plate dark"><img src="assets/img/aircraft-final.png" width="1163" height="693" loading="lazy" alt="Render of the final aircraft."><figcaption>Onshape render, 2025.</figcaption></figure>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="band navy">
+    <div class="wrap split">
+      <div>
+        <h2>Why it exists</h2>
+        <p style="color:#D5E0EE">In the past decade, more than 400,000 people died in natural disasters, most of them in developing countries. Aerial reconnaissance helps first responders find survivors and assess damage, but capable drones cost over $10,000.</p>
+        <div class="stats">
+          <div class="stat"><b>75%</b><span>of casualties happen in the first 48 hours after a disaster</span></div>
+          <div class="stat"><b>80%+</b><span>of first-responder agencies cannot afford aerial support</span></div>
+          <div class="stat"><b>&lt;$1k</b><span>to build R.A.M.P.A.T., with thermal imaging</span></div>
+        </div>
+      </div>
+      <figure class="plate dark" style="padding:0;overflow:hidden">
+        <img src="assets/img/hurricane-melissa.jpg" width="1600" height="900" loading="lazy" alt="Aerial photo of flooded homes in Jamaica after Hurricane Melissa.">
+        <figcaption style="padding:0 1rem 1rem">Jamaica after Hurricane Melissa, 2025. Floods cut off roads, and search efforts took nearly two months. Source: supportjamaica.gov.jm</figcaption>
+      </figure>
+    </div>
+  </section>
+</section>
+
+<!-- =========================================================
+     CAD
+     ========================================================= -->
+<section id="cad" role="tabpanel" aria-labelledby="t-cad" tabindex="-1" hidden>
+  <div class="phero">
+    <div class="wrap">
+      <div>
+        <span class="crumb">CAD</span>
+        <h1>Modify it, or print it as is.</h1>
+        <p>The STEP assembly is for changing the design: fitting a different camera, motor or battery. The STL pack is every part ready for your slicer.</p>
+      </div>
+      <figure style="margin:0"><img src="assets/img/cad-model.png" width="706" height="264" alt="Render of a printed wing panel with its spar channels and slot tabs." style="width:100%"></figure>
+    </div>
+  </div>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="dl-pair">
+        <article class="dl-card">
+          <span class="fmt">STEP · AP214</span>
+          <h3>Assembly for modifications</h3>
+          <p>The full aircraft as one STEP file, exported from Onshape in millimetres. Opens in Onshape, Fusion, SolidWorks and FreeCAD.</p>
+          <ul>
+            <li>All 53 printed parts in position</li>
+            <li>Motors, servos, screws and carbon tubes for reference</li>
+          </ul>
+          <a class="btn" href="files/cad/RAMPAT-CAD-assembly-STEP.zip" download>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></svg>
+            Download STEP <small>ZIP · 4.5 MB</small>
+          </a>
+        </article>
+        <article class="dl-card">
+          <span class="fmt">STL · 53 files</span>
+          <h3>Parts for printing</h3>
+          <p>One STL per printed part, sorted into wing, fuselage, nacelles and tail folders, with a parts list that maps each file to its CAD name.</p>
+          <ul>
+            <li>Left and right parts are mirrored, so print each file once</li>
+            <li>Includes parts-list.csv with sizes and volumes</li>
+          </ul>
+          <a class="btn" href="files/cad/RAMPAT-printable-STL.zip" download>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></svg>
+            Download STL pack <small>ZIP · 12 MB</small>
+          </a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap">
+      <div class="split" style="align-items:end">
+        <div>
+          <h2>Every printed part</h2>
+          <p>Broke a part in the field? Download and reprint just that one. Pick a section to filter the list.</p>
+          <div class="legend" id="groupChips" aria-label="Filter parts by section">
+            <button class="chip" data-g="all" aria-pressed="true">All <small>53</small></button>
+            <button class="chip" data-g="wing" aria-pressed="false"><i style="background:#96BAD6"></i>Wing <small>18</small></button>
+            <button class="chip" data-g="fuselage" aria-pressed="false"><i style="background:#EBEEF2"></i>Fuselage <small>6</small></button>
+            <button class="chip" data-g="nacelles" aria-pressed="false"><i style="background:#FFA826"></i>Nacelles <small>11</small></button>
+            <button class="chip" data-g="tail" aria-pressed="false"><i style="background:#6E8CAA"></i>Tail <small>18</small></button>
+          </div>
+        </div>
+        <figure style="margin:0"><img src="assets/img/assembly-groups.webp" width="1600" height="1000" loading="lazy" alt="Render of the assembled printed parts, colored by section: wing in light blue, fuselage in white, nacelles in orange and tail in slate blue."></figure>
+      </div>
+
+      <div class="toolbar">
+        <p class="fine" id="partsCount" aria-live="polite">Showing 53 parts</p>
+        <label class="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <span class="sr">Search parts</span>
+          <input id="partSearch" type="search" placeholder="Search parts, e.g. aileron">
+        </label>
+      </div>
+      <div class="parts" id="parts"></div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="grid2">
+        <div>
+          <h2>Printing</h2>
+          <p>The airframe is designed for LW-PETG, a foaming PETG that prints light enough for long-endurance flight and stays waterproof outdoors. Use gyroid infill throughout. Each part card above shows its profile.</p>
+          <div class="tbl" style="margin-top:1.4rem">
+            <table>
+              <thead><tr><th>Parts</th><th>Wall loops</th><th>Gyroid infill</th></tr></thead>
+              <tbody>
+                <tr><th>Fuselage shells<br><small style="font-weight:400;color:var(--muted)">nose cone, front, center</small></th><td>1</td><td>3%</td></tr>
+                <tr><th>Wings<br><small style="font-weight:400;color:var(--muted)">wing panels, ailerons</small></th><td>1</td><td>5%</td></tr>
+                <tr><th>Connectors<br><small style="font-weight:400;color:var(--muted)">joiners, mounts, root plates, pins</small></th><td>3</td><td>20%</td></tr>
+                <tr><th>Everything else</th><td>2</td><td>20%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="fine" style="margin-top:.8rem">Set LW-PETG temperature and flow for the density your filament brand recommends.</p>
+        </div>
+        <div>
+          <h2>Parts you buy</h2>
+          <p>Electronics and hardware that are not printed. Carbon tube sizes come from the CAD.</p>
+          <div class="tbl" style="margin-top:1.4rem">
+            <table>
+              <thead><tr><th>Part</th><th>Spec</th><th>Qty</th></tr></thead>
+              <tbody>
+                <tr><th>Brushless motor</th><td class="num">LC2835-12T</td><td>3</td></tr>
+                <tr><th>ESC</th><td class="num">30 A</td><td>3</td></tr>
+                <tr><th>Propeller, front puller</th><td class="num">13×4 CCW</td><td>2</td></tr>
+                <tr><th>Propeller, rear pusher</th><td class="num">13×4 CW</td><td>1</td></tr>
+                <tr><th>Tilt servo</th><td class="num">MG995R</td><td>3</td></tr>
+                <tr><th>Control surface servo</th><td class="num">SG90</td><td>4</td></tr>
+                <tr><th>LiPo battery</th><td class="num">4S 8000 mAh</td><td>1</td></tr>
+                <tr><th>Power distribution board</th><td class="num">Standard PDB</td><td>1</td></tr>
+                <tr><th>Flight controller</th><td class="num"><a href="#pcb">Custom PCB</a></td><td>1</td></tr>
+                <tr><th>Carbon tube, main wing spar</th><td class="num">16 × 1391 mm</td><td>1</td></tr>
+                <tr><th>Carbon tube, tail boom</th><td class="num">20 × 921 mm</td><td>1</td></tr>
+                <tr><th>Carbon tube, front motor booms</th><td class="num">20.5 × 375 mm</td><td>2</td></tr>
+                <tr><th>Carbon rod, wing</th><td class="num">6.5 × 1250 mm</td><td>1</td></tr>
+                <tr><th>Socket head screws</th><td class="num">McMaster 91290A111, A120, A170, A176</td><td>—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap split">
+      <div>
+        <h2>Built to be repaired</h2>
+        <p>Parts slot together along the carbon tubes, so a damaged section comes off and a new print goes on. A crash becomes a quick reprint instead of a lost aircraft.</p>
+        <p>The wing is split into panels on a carbon fiber spar for stiffness. The three-part fuselage holds the battery, PCB and thermal camera.</p>
+      </div>
+      <div class="grid2">
+        <figure class="plate"><img src="assets/img/modular-slotting.jpg" width="764" height="212" loading="lazy" alt="Side view of fuselage sections slotting onto a carbon tube."><figcaption>Sections slot onto the carbon tube.</figcaption></figure>
+        <figure class="plate dark"><img src="assets/img/print-photo.png" width="737" height="553" loading="lazy" alt="Photo of a printed black fuselage section."><figcaption>Printed fuselage section.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- =========================================================
+     PCB
+     ========================================================= -->
+<section id="pcb" role="tabpanel" aria-labelledby="t-pcb" tabindex="-1" hidden>
+  <div class="phero">
+    <div class="wrap">
+      <div>
+        <span class="crumb">PCB design</span>
+        <h1>A custom flight controller for $75.</h1>
+        <p>Off-the-shelf flight controllers with the features this aircraft needs cost over $500. A custom board brought that down by 85%, using off-the-shelf sensors and custom control software.</p>
+        <div class="stats" style="max-width:520px">
+          <div class="stat"><b>$75</b><span>vs $500+ for commercial boards</span></div>
+          <div class="stat"><b>85%</b><span>lower cost</span></div>
+        </div>
+      </div>
+      <figure class="plate dark" style="padding:0;overflow:hidden;max-width:420px;justify-self:center">
+        <img src="assets/img/pcb-photo.jpg" width="1350" height="1800" alt="Photo of the assembled blue flight controller PCB with a microcontroller module, connectors and a capacitor.">
+      </figure>
+    </div>
+  </div>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="head">
+        <h2>How the board was designed</h2>
+        <p class="lead">From requirements to a logged flight.</p>
+      </div>
+      <ol class="timeline">
+        <li>
+          <div>
+            <span class="num"></span>
+            <h3>Set the requirements</h3>
+            <p>The tiltrotor's design and its sub-$1,000 budget ruled out commercial controllers. The board needed:</p>
+            <ul>
+              <li>Full sensor integration</li>
+              <li>Long-range radio telemetry</li>
+              <li>High-frequency flight stabilization</li>
+              <li>Onboard data logging to microSD</li>
+            </ul>
+          </div>
+          <div class="plate" style="display:grid;gap:1rem">
+            <p style="margin:0"><b>The board that came out of it</b></p>
+            <dl class="kv">
+              <dt>Layers</dt><dd>4</dd>
+              <dt>Size</dt><dd>122.5 × 61.5 mm</dd>
+              <dt>Thickness</dt><dd>1.6 mm</dd>
+              <dt>Finish</dt><dd>HASL (leaded)</dd>
+              <dt>Min track width</dt><dd>0.254 mm (10 mil)</dd>
+              <dt>Min spacing</dt><dd>0.127 mm (5 mil)</dd>
+              <dt>Min drill</dt><dd>0.33 mm</dd>
+            </dl>
+          </div>
+        </li>
+        <li class="flip">
+          <div>
+            <span class="num"></span>
+            <h3>Lay it out in KiCad</h3>
+            <p>The schematic and layout were drawn in KiCad 9 on a four-layer, 122.5 × 61.5 mm board, with traces routed between the microcontroller, sensors, radio, servo outputs and ESC outputs.</p>
+            <p>The Gerber and drill files exported from this layout are what you upload to a PCB fab.</p>
+          </div>
+          <figure class="plate"><img src="assets/img/pcb-layout.jpg" width="1259" height="802" loading="lazy" alt="KiCad layout of the flight controller with red and orange copper traces on a dark background."><figcaption>Full board layout in KiCad, showing signal routes and components.</figcaption></figure>
+        </li>
+        <li>
+          <div>
+            <span class="num"></span>
+            <h3>Fabricate and assemble</h3>
+            <p>The board was fabricated, then populated with off-the-shelf sensor and radio modules. Keeping the modules standard means they can be swapped if one fails.</p>
+          </div>
+          <figure class="plate dark" style="max-width:360px;justify-self:center"><img src="assets/img/pcb-photo.jpg" width="1350" height="1800" loading="lazy" alt="Close photo of the assembled PCB."><figcaption>Assembled board. Photo by the researcher, 2025.</figcaption></figure>
+        </li>
+        <li class="flip">
+          <div>
+            <span class="num"></span>
+            <h3>Write the control loop</h3>
+            <p>The firmware reads the IMU, fuses the data into an attitude estimate, compares it to the desired position, and drives the motors and servos through PID control and control mixing.</p>
+            <ol class="loop" aria-label="Flight control loop">
+              <li>Get IMU data</li><li class="arrow" aria-hidden="true">→</li>
+              <li>Fuse IMU data</li><li class="arrow" aria-hidden="true">→</li>
+              <li>Get desired position</li><li class="arrow" aria-hidden="true">→</li>
+              <li>PID control</li><li class="arrow" aria-hidden="true">→</li>
+              <li>Control mixing</li><li class="arrow" aria-hidden="true">→</li>
+              <li>Actuator outputs</li><li class="arrow" aria-hidden="true">→</li>
+              <li class="back">Vehicle response, back to IMU</li>
+            </ol>
+          </div>
+          <div style="display:grid;gap:1rem">
+            <div class="eq">
+              <img src="assets/img/eq-pid.png" width="759" height="159" loading="lazy" alt="PID equation: u of t equals K p times e of t, plus K i times the integral of e, plus K d times the derivative of e.">
+              <dl>
+                <dt>u(t)</dt><dd>actuator output command</dd>
+                <dt>e(t)</dt><dd>error</dd>
+                <dt>Kp, Ki, Kd</dt><dd>proportional, integral and derivative gains</dd>
+              </dl>
+            </div>
+            <div class="eq">
+              <img src="assets/img/eq-mixing.png" width="758" height="170" loading="lazy" alt="Transition mixing equation: delta equals the minimum of 1 and the maximum of 0 and V minus 10 over 5, times delta command.">
+              <dl>
+                <dt>δ</dt><dd>true control surface output</dd>
+                <dt>δcmd</dt><dd>pilot-commanded control surface output</dd>
+                <dt>V</dt><dd>measured airspeed</dd>
+              </dl>
+              <p class="fine" style="margin-top:.8rem">Control surfaces fade in between 10 and 15 m/s, as the wing takes over from the rotors.</p>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <span class="num"></span>
+            <h3>Log and validate</h3>
+            <p>Every flight logs time, throttle and power draw to a microSD card. A cubic regression of power against airspeed from these logs fed the endurance results.</p>
+          </div>
+          <div class="grid2" style="grid-template-columns:2fr 3fr">
+            <figure class="plate"><img src="assets/img/flight-log-sample.jpg" width="393" height="686" loading="lazy" alt="Table of logged flight data with time, throttle and power columns."><figcaption>Sample of logged data.</figcaption></figure>
+            <figure class="plate"><img src="assets/img/power-vs-airspeed.jpg" width="1200" height="800" loading="lazy" alt="Scatter plot of power against airspeed with a fitted cubic regression curve."><figcaption>Power vs airspeed with a cubic fit.</figcaption></figure>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap">
+      <div class="dl-pair">
+        <article class="dl-card">
+          <span class="fmt pcb">Gerber · drill · 4-layer</span>
+          <h3>Flight controller PCB files</h3>
+          <p>Upload this ZIP as-is to a PCB fab such as PCBWay or JLCPCB. Choose 4 layers, 1.6 mm thickness and HASL finish; the fab reads the board size from the files.</p>
+          <ul>
+            <li>Four copper layers, mask, paste and silkscreen</li>
+            <li>Plated and non-plated drill files, plus a KiCad job file</li>
+          </ul>
+          <a class="btn" href="files/pcb/RAMPAT-PCB.zip" download>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></svg>
+            Download PCB files <small>ZIP · 108 KB</small>
+          </a>
+        </article>
+        <article class="dl-card">
+          <span class="fmt">Before you power it</span>
+          <h3>First power-up</h3>
+          <p>Check the battery connector polarity against the board's silkscreen markings. Power the board with the motors disconnected and the propellers off, and confirm telemetry and sensor readings before arming.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- =========================================================
+     CFD
+     ========================================================= -->
+<section id="cfd" role="tabpanel" aria-labelledby="t-cfd" tabindex="-1" hidden>
+  <div class="phero">
+    <div class="wrap">
+      <div>
+        <span class="crumb">CFD</span>
+        <h1>Shaped by airflow simulation.</h1>
+        <p>The airframe went through seven geometries in SimScale. Each round cut high-pressure areas on the front of the aircraft and increased low pressure over the top of the wing.</p>
+        <div class="stats" style="max-width:560px">
+          <div class="stat"><b>73%</b><span>less drag, geometry 1 to 7</span></div>
+          <div class="stat"><b>12.1</b><span>lift to drag ratio; industry is 10+</span></div>
+        </div>
+      </div>
+      <figure style="margin:0"><img src="assets/img/cfd-geometry-7.jpg" width="786" height="471" alt="Final geometry colored by surface pressure, mostly green and blue over the wing." style="border-radius:var(--r-md)"></figure>
+    </div>
+  </div>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="head">
+        <h2>Watch the airflow change with speed</h2>
+        <p class="lead">Velocity and pressure fields around the final geometry at four cruise speeds.</p>
+      </div>
+      <div class="viewer">
+        <div class="v-controls">
+          <div class="seg" role="group" aria-label="Field">
+            <button type="button" data-field="v" aria-pressed="true">Velocity</button>
+            <button type="button" data-field="p" aria-pressed="false">Pressure</button>
+          </div>
+          <div class="speed-range">
+            <label for="speed" style="font-weight:600">Airspeed</label>
+            <input id="speed" type="range" min="0" max="3" step="1" value="0" list="speedTicks">
+            <datalist id="speedTicks"><option value="0"></option><option value="1"></option><option value="2"></option><option value="3"></option></datalist>
+            <output id="speedOut" class="v-label" for="speed">15 m/s</output>
+          </div>
+        </div>
+        <div class="v-stage">
+          <img id="field" src="assets/img/cfd-v-15.jpg" alt="Velocity field around the aircraft at 15 metres per second.">
+        </div>
+        <div class="v-foot">
+          <div class="scale"><span>Low</span><img src="assets/img/cfd-colorbar.png" width="374" height="17" alt=""><span>High</span></div>
+          <p class="fine" id="fieldNote">Side view. Blue areas are slower air; red areas are faster.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap">
+      <div class="head">
+        <h2>Geometry 1 to geometry 7</h2>
+        <p class="lead">Surface pressure on the first and final airframes. Red is high pressure, which adds drag.</p>
+      </div>
+      <div class="compare">
+        <figure class="plate"><img src="assets/img/cfd-geometry-1.jpg" width="1178" height="724" loading="lazy" alt="Geometry 1 colored by pressure, with red high-pressure areas on its blunt fuselage front and nacelles."><figcaption><b>Geometry 1.</b> Blunt fuselage with large high-pressure areas.</figcaption></figure>
+        <div class="vs"><div><b>−73%</b><span>drag</span></div></div>
+        <figure class="plate"><img src="assets/img/cfd-geometry-7.jpg" width="786" height="471" loading="lazy" alt="Geometry 7 colored by pressure, with a pointed nose and low-pressure blue over the wing."><figcaption><b>Geometry 7.</b> Streamlined fuselage and landing gear, more low pressure over the wing.</figcaption></figure>
+      </div>
+      <div class="grid3" style="margin-top:2.5rem">
+        <div><h3>Less high pressure</h3><p>Reducing the red areas on the nose, nacelles and landing gear cut pressure drag.</p></div>
+        <div><h3>More low pressure</h3><p>Increasing the blue area over the wing raised lift. Together these raise the lift to drag ratio.</p></div>
+        <div><h3>Lift at low speed</h3><p>The NACA 6409 airfoil makes high lift at lower speeds, which increases payload capacity.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="head">
+        <h2>Checking the simulation</h2>
+        <p class="lead">The CFD solutions converged at every speed, and flight tests landed within the predicted bounds.</p>
+      </div>
+      <div class="grid2">
+        <figure class="plate"><img src="assets/img/cfd-forces.jpg" width="1200" height="742" loading="lazy" alt="Line chart of lift and drag force against iteration at 15 to 22.5 m/s, each flattening out."><figcaption>Lift and drag forces converge at each speed.</figcaption></figure>
+        <figure class="plate"><img src="assets/img/cfd-mesh.jpg" width="1200" height="742" loading="lazy" alt="Line chart of drag force against mesh element count, flattening as the mesh gets finer."><figcaption>Mesh independence: drag stops changing as the mesh is refined.</figcaption></figure>
+        <figure class="plate"><img src="assets/img/cfd-residuals.jpg" width="1200" height="742" loading="lazy" alt="Line chart of solver residuals falling over 1000 iterations."><figcaption>Residuals fall and level off.</figcaption></figure>
+        <figure class="plate"><img src="assets/img/endurance-vs-cfd.jpg" width="1200" height="742" loading="lazy" alt="Line chart comparing CFD-predicted endurance and measured flight endurance from 15 to 22.5 m/s."><figcaption>Measured flight endurance comes close to the CFD maximum.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- =========================================================
+     RESULTS
+     ========================================================= -->
+<section id="results" role="tabpanel" aria-labelledby="t-results" tabindex="-1" hidden>
+  <div class="phero">
+    <div class="wrap">
+      <div>
+        <span class="crumb">Results</span>
+        <h1>$10,000-class performance for under $1,000.</h1>
+        <p>Across 15 repeated test flights, R.A.M.P.A.T. matched mid-tier commercial UAVs in endurance and search area, and outperformed low-cost multirotors by 4 to 6 times.</p>
+      </div>
+      <figure class="plate" style="margin:0"><img src="assets/img/perf-envelope.jpg" width="1175" height="789" alt="Scatter plot of flight time against search area with uncertainty ellipses; R.A.M.P.A.T. overlaps the $10,000 aircraft."><figcaption>Overlapping uncertainty envelopes indicate similar performance.</figcaption></figure>
+    </div>
+  </div>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="head"><h2>Design criteria</h2><p class="lead">All three were met, based on flight data.</p></div>
+      <div class="grid3">
+        <div class="dl-card"><span class="fmt pcb">Met</span><h3>Performance</h3><p>Over 1,800 acres of search capability and over 2.75 hours of endurance.</p></div>
+        <div class="dl-card"><span class="fmt pcb">Met</span><h3>Affordability</h3><p>Materials cost under $1,000. The build came in at $978.</p></div>
+        <div class="dl-card"><span class="fmt pcb">Met</span><h3>Functionality</h3><p>Swappable parts and vertical takeoff and landing.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap">
+      <div class="head"><h2>Against commercial UAVs</h2><p class="lead">Commercial figures are manufacturer-reported ranges. R.A.M.P.A.T. figures come from repeated testing, with 12% uncertainty.</p></div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>UAV</th><th>Flight time</th><th>Search area</th><th>Cost</th></tr></thead>
+          <tbody>
+            <tr class="us"><th>R.A.M.P.A.T.</th><td class="num">178 min</td><td class="num">1,900 acres</td><td class="num">$978</td></tr>
+            <tr><th>DJI Mavic 3 Pro</th><td class="num">43 min</td><td class="num">300 acres</td><td class="num">$2,500</td></tr>
+            <tr><th>senseFly eBee X</th><td class="num">200 min</td><td class="num">2,200 acres</td><td class="num">$10,000</td></tr>
+            <tr><th>Airmobi V21</th><td class="num">190 min</td><td class="num">2,075 acres</td><td class="num">$10,000</td></tr>
+            <tr><th>Airmobi V39</th><td class="num">215 min</td><td class="num">2,450 acres</td><td class="num">$11,000</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid2" style="margin-top:1.5rem">
+        <figure class="plate"><img src="assets/img/perf-vs-industry.jpg" width="1200" height="742" loading="lazy" alt="Bar chart of flight time and search area for R.A.M.P.A.T. and four commercial UAVs."><figcaption>Flight time and search area against industry UAVs.</figcaption></figure>
+        <figure class="plate"><img src="assets/img/cost-normalized.jpg" width="636" height="374" loading="lazy" alt="Bar chart of minutes per dollar and acres per dollar, where R.A.M.P.A.T. is roughly ten times higher than the others."><figcaption>Per dollar, R.A.M.P.A.T. delivers an order of magnitude more flight time and search area.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="head"><h2>Flight test procedure</h2><p class="lead">Repeated 15 times to measure variance.</p></div>
+      <ol class="steps" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+        <li><h3>Preflight</h3><p>Install the battery, power the avionics, and check telemetry and control surfaces. Arm and confirm hover, transition and fixed-wing modes.</p></li>
+        <li><h3>Hover</h3><p>Take off vertically and hold altitude for 5 minutes, logging current draw and gyroscope data.</p></li>
+        <li><h3>Transition</h3><p>Climb to 50 ft, enter transition mode and hold throttle for 2 minutes, logging gyroscope and airspeed.</p></li>
+        <li><h3>Cruise</h3><p>Switch to fixed-wing mode and cruise for 10 minutes, logging gyroscope, airspeed and power.</p></li>
+        <li><h3>Recovery</h3><p>Transition back to hover, land vertically, then disarm and power down.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="band navy">
+    <div class="wrap split">
+      <div>
+        <h2>What comes next</h2>
+        <p style="color:#D5E0EE">Future work focuses on real-world mission capability, more autonomy, scaling deployment, and further environmental and operational testing.</p>
+        <p style="color:#D5E0EE">One direction is swarms: several aircraft networked together to cover a search area faster.</p>
+        <p style="margin-top:1.6rem"><a class="btn" href="files/RAMPAT-poster-2026.pdf" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></svg>
+          Download the research poster <small>PDF · 2.9 MB</small></a></p>
+      </div>
+      <figure class="plate"><img src="assets/img/swarm.jpg" width="1087" height="829" loading="lazy" alt="Diagram of six aircraft connected by dashed network links."><figcaption>Example swarm network of six aircraft.</figcaption></figure>
+    </div>
+  </section>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <b>R.A.M.P.A.T.</b>
+      <p style="margin-top:.5rem">Rapid, Affordable, Modular, Printed, Aerial Tiltrotor for emergency response. Designed by Aarit Dixit.</p>
+      <p class="fine" style="color:#A9BCD6">Licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>: share and adapt with credit, not for commercial use.</p>
+      <p class="fine" style="color:#A9BCD6">Fly within local drone regulations and keep the aircraft in line of sight. Remove propellers when working on the aircraft powered.</p>
+    </div>
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#cad">CAD</a></li>
+      <li><a href="#pcb">PCB design</a></li>
+      <li><a href="#cfd">CFD</a></li>
+      <li><a href="#results">Results</a></li>
+    </ul>
+    <ul>
+      <li><a href="https://github.com/TheCoder314/RAMPAT-TheCoder314.github.io">GitHub repository</a></li>
+      <li><a href="https://github.com/TheCoder314/RAMPAT-TheCoder314.github.io/issues">Report a problem</a></li>
+      <li><a href="files/RAMPAT-all-files.zip" download>Download all files</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+const PARTS = [{"g":"wing","n":"aileron-L1","d":"Left control surface, inboard","s":[200,50,20],"kb":106,"p":"wing"},{"g":"wing","n":"aileron-L2","d":"Left control surface, middle","s":[210,50,20],"kb":344,"p":"wing"},{"g":"wing","n":"aileron-L3","d":"Left control surface, outboard","s":[236,50,20],"kb":249,"p":"wing"},{"g":"wing","n":"aileron-R1","d":"Right control surface, inboard","s":[200,50,20],"kb":106,"p":"wing"},{"g":"wing","n":"aileron-R2","d":"Right control surface, middle","s":[210,50,20],"kb":344,"p":"wing"},{"g":"wing","n":"aileron-R3","d":"Right control surface, outboard","s":[236,50,20],"kb":249,"p":"wing"},{"g":"wing","n":"boom-mount-L","d":"Left boom mount, under wing","s":[42,34,16],"kb":96,"p":"con"},{"g":"wing","n":"boom-mount-R","d":"Right boom mount, under wing","s":[42,34,16],"kb":96,"p":"con"},{"g":"wing","n":"wing-panel-L1","d":"Left wing panel, root","s":[252,151,31],"kb":854,"p":"wing"},{"g":"wing","n":"wing-panel-L2","d":"Left wing panel","s":[155,114,23],"kb":403,"p":"wing"},{"g":"wing","n":"wing-panel-L3","d":"Left wing panel","s":[250,114,23],"kb":683,"p":"wing"},{"g":"wing","n":"wing-panel-L4","d":"Left wing panel, tip","s":[259,170,61],"kb":2727,"p":"wing"},{"g":"wing","n":"wing-panel-R1","d":"Right wing panel, root","s":[252,151,31],"kb":854,"p":"wing"},{"g":"wing","n":"wing-panel-R2","d":"Right wing panel","s":[155,114,23],"kb":403,"p":"wing"},{"g":"wing","n":"wing-panel-R3","d":"Right wing panel","s":[250,114,23],"kb":683,"p":"wing"},{"g":"wing","n":"wing-panel-R4","d":"Right wing panel, tip","s":[259,170,61],"kb":2742,"p":"wing"},{"g":"wing","n":"wing-root-plate-L","d":"Left wing root plate","s":[152,45,5],"kb":57,"p":"con"},{"g":"wing","n":"wing-root-plate-R","d":"Right wing root plate","s":[152,45,5],"kb":54,"p":"con"},{"g":"fuselage","n":"avionics-tray","d":"Floor plate for PCB and battery","s":[177,139,3],"kb":6,"p":"std"},{"g":"fuselage","n":"fuselage-center","d":"Center section, wing joint","s":[250,150,94],"kb":1566,"p":"fus"},{"g":"fuselage","n":"fuselage-front","d":"Front fuselage section","s":[250,150,69],"kb":12608,"p":"fus"},{"g":"fuselage","n":"fuselage-insert","d":"Internal fuselage insert","s":[134,44,29],"kb":1,"p":"std"},{"g":"fuselage","n":"nose-cone","d":"Streamlined nose cone","s":[178,75,69],"kb":362,"p":"fus"},{"g":"fuselage","n":"tail-boom-joiner","d":"Joins tail boom to center section","s":[65,27,27],"kb":11,"p":"con"},{"g":"nacelles","n":"boom-fairing-L","d":"Left boom fairing","s":[157,56,37],"kb":538,"p":"std"},{"g":"nacelles","n":"boom-fairing-R","d":"Right boom fairing","s":[157,56,37],"kb":543,"p":"std"},{"g":"nacelles","n":"front-boom-L","d":"Left motor boom with landing leg","s":[235,207,35],"kb":177,"p":"std"},{"g":"nacelles","n":"front-boom-R","d":"Right motor boom with landing leg","s":[235,235,44],"kb":205,"p":"std"},{"g":"nacelles","n":"servo-frame-L","d":"Left tilt-servo frame","s":[56,29,4],"kb":43,"p":"std"},{"g":"nacelles","n":"servo-frame-R","d":"Right tilt-servo frame","s":[56,29,4],"kb":43,"p":"std"},{"g":"nacelles","n":"servo-housing-L","d":"Left tilt-servo housing","s":[56,37,29],"kb":53,"p":"std"},{"g":"nacelles","n":"tilt-bracket-L-a","d":"Left tilt bracket","s":[73,45,29],"kb":92,"p":"std"},{"g":"nacelles","n":"tilt-bracket-L-b","d":"Left tilt bracket, servo side","s":[73,45,41],"kb":76,"p":"std"},{"g":"nacelles","n":"tilt-bracket-R-a","d":"Right tilt bracket","s":[73,45,29],"kb":92,"p":"std"},{"g":"nacelles","n":"tilt-bracket-R-b","d":"Right tilt bracket, servo side","s":[73,45,41],"kb":75,"p":"std"},{"g":"tail","n":"control-horn-a","d":"Ruddervator control horn","s":[10,7,6],"kb":1,"p":"std"},{"g":"tail","n":"control-horn-b","d":"Ruddervator control horn","s":[20,7,7],"kb":1,"p":"std"},{"g":"tail","n":"pin-a","d":"Small pin","s":[6,5,5],"kb":10,"p":"con"},{"g":"tail","n":"pin-b","d":"Small pin","s":[6,5,5],"kb":10,"p":"con"},{"g":"tail","n":"rear-servo-frame","d":"Rear tilt-servo frame","s":[56,29,4],"kb":43,"p":"std"},{"g":"tail","n":"rear-tilt-bracket-a","d":"Rear motor tilt bracket","s":[73,45,29],"kb":92,"p":"std"},{"g":"tail","n":"rear-tilt-bracket-b","d":"Rear motor tilt bracket, servo side","s":[73,45,41],"kb":76,"p":"std"},{"g":"tail","n":"ruddervator-L","d":"Left ruddervator","s":[149,107,31],"kb":11,"p":"std"},{"g":"tail","n":"ruddervator-R","d":"Right ruddervator","s":[149,107,31],"kb":11,"p":"std"},{"g":"tail","n":"tail-boom-sleeve-1","d":"Tail boom sleeve, front","s":[233,38,38],"kb":161,"p":"std"},{"g":"tail","n":"tail-boom-sleeve-2","d":"Tail boom sleeve, middle","s":[243,38,38],"kb":72,"p":"std"},{"g":"tail","n":"tail-boom-sleeve-3","d":"Tail boom sleeve, rear","s":[257,38,38],"kb":380,"p":"std"},{"g":"tail","n":"tail-mount","d":"Tail mount and rear motor pod","s":[212,93,71],"kb":632,"p":"std"},{"g":"tail","n":"v-tail-L","d":"Left V-tail surface","s":[188,134,71],"kb":1013,"p":"std"},{"g":"tail","n":"v-tail-R","d":"Right V-tail surface","s":[188,134,70],"kb":1011,"p":"std"},{"g":"tail","n":"v-tail-tip-L","d":"Left V-tail tip","s":[100,57,44],"kb":139,"p":"std"},{"g":"tail","n":"v-tail-tip-R","d":"Right V-tail tip","s":[100,57,44],"kb":139,"p":"std"},{"g":"tail","n":"ventral-fin","d":"Ventral fin and rear landing leg","s":[233,211,38],"kb":625,"p":"std"}];
+(function(){
+  /* ---------- tabs with hash routing ---------- */
+  const tabs=[...document.querySelectorAll('[role=tab]')];
+  const ids=tabs.map(t=>t.getAttribute('aria-controls'));
+  function show(id, focusTab){
+    if(!ids.includes(id)) id='overview';
+    tabs.forEach(t=>{
+      const on=t.getAttribute('aria-controls')===id;
+      t.setAttribute('aria-selected',on); t.tabIndex=on?0:-1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden=!on;
+      if(on&&focusTab) t.focus();
+    });
+    document.title=(id==='overview'?'R.A.M.P.A.T. | Open-source 3D-printed tiltrotor VTOL':tabs[ids.indexOf(id)].textContent+' | R.A.M.P.A.T.');
+  }
+  function route(){ show(location.hash.slice(1)); window.scrollTo(0,0); }
+  tabs.forEach((t,i)=>{
+    t.addEventListener('click',()=>{ location.hash=t.getAttribute('aria-controls'); });
+    t.addEventListener('keydown',e=>{
+      let j=null;
+      if(e.key==='ArrowRight') j=(i+1)%tabs.length;
+      if(e.key==='ArrowLeft') j=(i-1+tabs.length)%tabs.length;
+      if(e.key==='Home') j=0; if(e.key==='End') j=tabs.length-1;
+      if(j!==null){ e.preventDefault(); location.hash=ids[j]; tabs[j].focus(); }
+    });
+  });
+  window.addEventListener('hashchange',route);
+  show(location.hash.slice(1));
+
+  /* ---------- parts gallery ---------- */
+  const grid=document.getElementById('parts'), q=document.getElementById('partSearch'),
+        count=document.getElementById('partsCount'), chips=[...document.querySelectorAll('#groupChips .chip')];
+  const LABEL={wing:'Wing',fuselage:'Fuselage',nacelles:'Nacelles',tail:'Tail'};
+  const PROFILE={fus:'1 wall · 3% gyroid',wing:'1 wall · 5% gyroid',con:'3 walls · 20% gyroid',std:'2 walls · 20% gyroid'};
+  let group='all';
+  grid.innerHTML=PARTS.map(p=>`
+    <article class="part" data-g="${p.g}" data-k="${(p.n+' '+p.d+' '+p.g).toLowerCase()}">
+      <div class="thumb"><img src="assets/parts/${p.n}.webp" width="480" height="360" loading="lazy" alt="Render of ${p.n}"></div>
+      <div class="meta">
+        <span class="fn">${p.n}.stl</span>
+        <span class="ds">${p.d}</span>
+        <span class="pf pf-${p.p}">${PROFILE[p.p]}</span>
+        <div class="row">
+          <span class="sz">${p.s.join(' × ')} mm</span>
+          <a class="get" href="files/cad/stl/${p.g}/${p.n}.stl" download aria-label="Download ${p.n}.stl">STL</a>
+        </div>
+      </div>
+    </article>`).join('')+'<p class="empty" hidden id="noParts">No parts match. Try a shorter search or pick All.</p>';
+  const cards=[...grid.querySelectorAll('.part')], none=document.getElementById('noParts');
+  function filter(){
+    const term=q.value.trim().toLowerCase(); let n=0;
+    cards.forEach(c=>{ const ok=(group==='all'||c.dataset.g===group)&&(!term||c.dataset.k.includes(term)); c.hidden=!ok; if(ok) n++; });
+    none.hidden=n>0;
+    count.textContent=`Showing ${n} ${n===1?'part':'parts'}`+(group!=='all'?` in ${LABEL[group]}`:'');
+  }
+  chips.forEach(c=>c.addEventListener('click',()=>{
+    group=c.dataset.g; chips.forEach(x=>x.setAttribute('aria-pressed',x===c)); filter();
+  }));
+  q.addEventListener('input',filter);
+
+  /* ---------- CFD field viewer ---------- */
+  const SPEEDS=[['15','15'],['17_5','17.5'],['20','20'],['22_5','22.5']];
+  const img=document.getElementById('field'), sp=document.getElementById('speed'), out=document.getElementById('speedOut'),
+        note=document.getElementById('fieldNote'), fbtn=[...document.querySelectorAll('[data-field]')];
+  let field='v';
+  // preload
+  SPEEDS.forEach(([k])=>['v','p'].forEach(f=>{ const i=new Image(); i.src=`assets/img/cfd-${f}-${k}.jpg`; }));
+  function draw(){
+    const [k,label]=SPEEDS[+sp.value];
+    img.src=`assets/img/cfd-${field}-${k}.jpg`;
+    img.alt=`${field==='v'?'Velocity':'Pressure'} field around the aircraft at ${label} metres per second.`;
+    out.textContent=`${label} m/s`;
+    note.textContent= field==='v' ? 'Side view. Blue areas are slower air; red areas are faster.' : 'Side view. Red areas are high pressure, which adds drag; blue areas are low pressure.';
+  }
+  sp.addEventListener('input',draw);
+  fbtn.forEach(b=>b.addEventListener('click',()=>{ field=b.dataset.field; fbtn.forEach(x=>x.setAttribute('aria-pressed',x===b)); draw(); }));
+})();
+</script>
+</body>
+</html>

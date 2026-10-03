@@ -1,0 +1,11 @@
+R.A.M.P.A.T. (Rapid, Affordable, Modular, Printed, Aerial Tiltrotor)
+Copyright (c) 2026 Aarit Dixit
+
+The CAD models, STL files, PCB design files, images and documentation in this
+repository are licensed under the Creative Commons Attribution-NonCommercial
+4.0 International License (CC BY-NC 4.0).
+
+You are free to share and adapt this material for non-commercial purposes,
+provided you give appropriate credit and indicate if changes were made.
+
+Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
